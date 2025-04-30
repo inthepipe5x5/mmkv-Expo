@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet, Image, Platform, Button } from 'react-native';
 
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
@@ -6,8 +6,11 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-
+import { useRootContext } from '@/app/_layout';
+import CacheTestText from '@/components/CacheTestText';
 export default function TabTwoScreen() {
+  const { cache, randomNumber, setRandomNumber } = useRootContext();
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -23,6 +26,23 @@ export default function TabTwoScreen() {
         <ThemedText type="title">Explore</ThemedText>
       </ThemedView>
       <ThemedText>This app includes example code to help you get started.</ThemedText>
+      <Button title="Set Random Number" onPress={() => {
+        const random = Math.floor(Math.random() * 100);
+        setRandomNumber(random);
+        cache.setItem('randomNumber', random.toString());
+        cache.setItem('randomNumberTimestamp', new Date().toISOString());
+        console.log('Random number set:', { random, timestamp: new Date().toISOString() });
+      }} />
+      <CacheTestText />
+      <Button title="Clear Cache" onPress={() => {
+        setRandomNumber(null);
+        cache.clear();
+        console.log('Cache cleared');
+        console.log('Cache items after clearing:', {
+          randomNumber: cache.getItem('randomNumber'),
+          randomNumberTimestamp: cache.getItem('randomNumberTimestamp'),
+        });
+      }} />
       <Collapsible title="File-based routing">
         <ThemedText>
           This app has two screens:{' '}
