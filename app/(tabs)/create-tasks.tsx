@@ -17,7 +17,13 @@ const HEADER_HEIGHT = 250;
 const genRandomId = () => {
     return Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
 }
-const defaultValues = { ...fakeTask, id: genRandomId(), created_dt: new Date().toISOString(), updated_dt: new Date().toISOString() }
+const defaultValues = {
+    ...fakeTask, id: genRandomId(),
+    created_dt: new Date().toISOString(),
+    updated_dt: new Date().toISOString(),
+    draft_status: "draft",
+    completion_status: "assigned",
+}
 
 const CreateTask = (initialFormValues: Partial<task> = defaultValues) => {
     const [formValues, setFormValues] = React.useState<Partial<task>>(initialFormValues);
@@ -40,11 +46,27 @@ const CreateTask = (initialFormValues: Partial<task> = defaultValues) => {
 
     const SaveButton = () => <Button title="Save"
         onPress={() => {
+            formValues.id = genRandomId();
+            formValues.created_dt = new Date().toISOString();
+            formValues.updated_dt = new Date().toISOString();
+            formValues.task_name = formValues.task_name ?? "Remind me";
+            formValues.description = formValues.description ?? "No description provided";
+            formValues.due_date = formValues.due_date ?? (() => { const date = new Date(); date.setDate(date.getDate() + 1); return date.toISOString(); })();
+            formValues.completion_status = formValues.completion_status ?? "assigned";
+            formValues.draft_status = formValues.draft_status ?? "confirmed";
+
+            console.log("Form Values:", formValues);
             cache.setItem("task", JSON.stringify(formValues));
             console.log("Cache set:", { task: formValues });
         }
         }
     />
+
+    const AdditionalMetaData = () =>
+        <ThemedView style={styles.textContainer}>
+            <Collapsible title="Additional Meta Data">
+            </Collapsible>
+        </ThemedView>
 
     return (
         <ParallaxScrollView

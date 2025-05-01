@@ -23,7 +23,7 @@ export default function TaskScreen() {
         <ParallaxScrollView
             headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
             headerImage={customImageBg({
-                source: require("@/assets/images/partial-react-logo.png"),
+                source: require("@/assets/images/estee-janssens-aQfhbxailCs-unsplash.jpg"),
                 style: styles.header,
             })}
         >
