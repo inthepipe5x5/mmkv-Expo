@@ -9,7 +9,7 @@ module.exports = function (api) {
       {
         jsxImportSource: "nativewind",
       },
-    ], '@babel/preset-typescript', "nativewind/babel", "nativewind/babel"],
+    ], '@babel/preset-typescript', "nativewind/babel"],
 
     plugins: [
       [
