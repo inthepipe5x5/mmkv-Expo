@@ -72,6 +72,18 @@ export default function HomeScreen() {
               uri={require('@/assets/svg/feedback/creative-draft.svg')}
             />
           </View>
+          <Pressable
+            style={{ padding: 10, marginHorizontal: 5 }}
+            android_ripple={{ color: Colors[colorScheme ?? 'light'].tint }}
+            onPress={() => {
+              sheetRef.current?.resize(1);
+              router.push('/camera/codeScanner')
+            }}>
+            <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
+              <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].tint} />
+              <Text>Open Barcode Scanner</Text>
+            </View>
+          </Pressable>
           <ThemedText>
             Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
             Press{' '}
@@ -146,7 +158,7 @@ export default function HomeScreen() {
               }}>
               <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
                 <MaterialIcons name="camera" size={28} color={Colors[colorScheme ?? 'light'].tint} />
-                <Text>Open Camera</Text>
+                <Text> asdfasfasdfsaf</Text>
               </View>
             </Pressable>
             <Pressable

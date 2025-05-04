@@ -43,7 +43,7 @@ export const CameraProvider = ({ children }: { children: React.ReactNode }) => {
     const { hasPermission } = useCameraPermission();
     const [cameraPermission, setCameraPermission] = React.useState<boolean | null>(hasPermission);
     const [scannedBarcodes, setScannedBarcodes] = React.useState<scannedBarcodeType>({});
-
+    //#region methods
     const syncPermissionStatus = React.useCallback((permission: CameraPermissionStatus) => {
         const cachedPermission = cache.getItem("cameraPermission") as CameraPermissionStatus | null;
         console.log("Cached permission", cachedPermission);
@@ -76,7 +76,7 @@ export const CameraProvider = ({ children }: { children: React.ReactNode }) => {
         //sync with cache
         cache.setItem("scannedBarcodes", JSON.stringify(scannedBarcodes));
     }, []);
-
+    //#endregion methods
     //#region sync effect 
     useEffect(() => {
         //sync the camera permission status with the cache

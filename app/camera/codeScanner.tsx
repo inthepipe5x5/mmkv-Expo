@@ -15,18 +15,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useIsFocused } from "@react-navigation/native";
 import { Skia, BlendMode, add } from '@shopify/react-native-skia';
 import { useCameraContext } from "@/components/contexts/CameraContext";
-import { CalculateWithinOverlay } from "@/utils/barcode";
-export const defaultCodeTypes = (defaultOverride?: CodeType[] | null) => {
-    if (defaultOverride) return defaultOverride;
+import normalizeBarcode, { CalculateWithinOverlay } from "@/utils/barcode";
+export const defaultCodeTypes = (defaultOverride?: CodeType[]) => {
+    if (defaultOverride) return defaultOverride as CodeType[];
 
-    const codes = ['code-128'
+    const codes = [
+        'code-128'
         , 'code-39'
         , 'code-93'
         , 'codabar'
         , 'ean-13'
         , 'ean-8'
         , 'itf'
-        , 'itf-14'
         , 'upc-e'
         // , 'upc-a'
         , 'qr'
@@ -37,6 +37,11 @@ export const defaultCodeTypes = (defaultOverride?: CodeType[] | null) => {
     if (Platform.OS === 'android') {
         codes.push('upc-a');
     }
+
+    if (Platform.OS === 'ios') {
+        codes.push('itf-14');
+    }
+    console.log("defaultCodeTypes", { codes });
     return codes as CodeType[]
 }
 
@@ -63,30 +68,31 @@ export const defaultCodeTypes = (defaultOverride?: CodeType[] | null) => {
 export default function CodeScannerScreen() {
     const device = useCameraDevice('back') as CameraDevice | undefined;
     // const { cache } = useRootContext();
-    const { addNewBarcode } = useCameraContext();
-    const ScanOverlay = useSkiaFrameProcessor((frame) => {
-        'worklet';
-        frame.render();
+    const { addNewBarcode, scannedBarcodes } = useCameraContext();
 
-        const width = frame.width;
-        const height = frame.height;
+    // const ScanOverlay = useSkiaFrameProcessor((frame) => {
+    //     'worklet';
+    //     frame.render();
 
-        const overlayPaint = Skia.Paint();
-        overlayPaint.setColor(Skia.Color('rgba(0, 0, 0, 0.5)'));
+    //     const width = frame.width;
+    //     const height = frame.height;
 
-        const rectWidth = width * 0.8;
-        const rectHeight = height * 0.5;
-        const rectX = (width - rectWidth) / 2;
-        const rectY = (height - rectHeight) / 2;
+    //     const overlayPaint = Skia.Paint();
+    //     overlayPaint.setColor(Skia.Color('rgba(0, 0, 0, 0.5)'));
 
-        // Draw dimmed background
-        frame.drawRect(Skia.XYWHRect(0, 0, width, height), overlayPaint);
+    //     const rectWidth = width * 0.8;
+    //     const rectHeight = height * 0.5;
+    //     const rectX = (width - rectWidth) / 2;
+    //     const rectY = (height - rectHeight) / 2;
 
-        // Clear the central rectangle area
-        const clearPaint = Skia.Paint();
-        clearPaint.setBlendMode(BlendMode.Clear);
-        frame.drawRect(Skia.XYWHRect(rectX, rectY, rectWidth, rectHeight), clearPaint);
-    }, []);
+    //     // Draw dimmed background
+    //     frame.drawRect(Skia.XYWHRect(0, 0, width, height), overlayPaint);
+
+    //     // Clear the central rectangle area
+    //     const clearPaint = Skia.Paint();
+    //     clearPaint.setBlendMode(BlendMode.Clear);
+    //     frame.drawRect(Skia.XYWHRect(rectX, rectY, rectWidth, rectHeight), clearPaint);
+    // }, []);
 
 
     if (!!!device) {
@@ -95,27 +101,33 @@ export default function CodeScannerScreen() {
     const codeScanner = useCodeScanner({
         codeTypes: defaultCodeTypes(),
         onCodeScanned: (codes: Code[]) => {
+            //do nothing if the code is already scanned 
+            if (codes.length === 0 || codes.every(code => !!code?.value && Object.keys(scannedBarcodes).includes(normalizeBarcode(code?.value)))) {
+                console.log("Already scanned", codes.map((code) => JSON.stringify(code, null, 4)));
+                return;
+            };
+            console.log("Scanned codes", codes.map((code) => JSON.stringify(code, null, 4)));
             // if ([codes, typeof codes?.value === 'string'].every(Boolean)) {
             //     addNewBarcode(codes.value as string);
             // }
-            if (!!!codes) return;
-            const filteredCodes = codes.filter((code) => {
+            // if (!!!codes) return;
+            // const filteredCodes = codes.filter((code) => {
 
-                if (Platform.OS === 'android') {
-                    return CalculateWithinOverlay({ code })
-                }
-                return code.value && typeof code.value === 'string' && code.type in defaultCodeTypes();
-            }) ?? []
-            if (filteredCodes.length === 0) return;
+            //     if (Platform.OS === 'android') {
+            //         return CalculateWithinOverlay({ code })
+            //     }
+            //     return code.value && typeof code.value === 'string' && code.type in defaultCodeTypes();
+            // }) ?? []
+            // if (filteredCodes.length === 0) return;
 
-            //add barcodes to stored context value
-            filteredCodes.map((code) => {
-                const barcode = code.value as string;
-                addNewBarcode(barcode);
-                Alert.alert("Scanned Barcode", barcode, [
-                    { text: "OK", onPress: () => console.log("OK Pressed") }
-                ]);
-            })
+            // //add barcodes to stored context value
+            // filteredCodes.map((code) => {
+            //     const barcode = code.value as string;
+            //     addNewBarcode(barcode);
+            //     Alert.alert("Scanned Barcode", barcode, [
+            //         { text: "OK", onPress: () => console.log("OK Pressed") }
+            //     ]);
+            // })
         }
     })
 
@@ -124,9 +136,10 @@ export default function CodeScannerScreen() {
             <Camera
                 device={device}
                 isActive={useIsFocused()}
-                frameProcessor={ScanOverlay}
+                // frameProcessor={ScanOverlay}
                 style={{ flex: 1 }}
                 codeScanner={codeScanner}
+                photoQualityBalance="speed"
             />
         </SafeAreaView >
     );
