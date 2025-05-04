@@ -9,7 +9,7 @@ import CacheTestText from '@/components/CacheTestText';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { Colors } from '@/constants/Colors';
-import { RelativePathString, useRouter } from 'expo-router';
+import { RelativePathString, Stack, useRouter } from 'expo-router';
 import { TabLayoutRouteMapping } from './_layout';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -37,6 +37,12 @@ export default function HomeScreen() {
             style={styles.reactLogo}
           />
         }>
+        <Stack
+          screenOptions={{
+            title: 'Home',
+            headerShown: true,
+          }}
+        />
         <ThemedView style={styles.titleContainer}>
           <ThemedText type="title">Welcome!</ThemedText>
           <HelloWave />

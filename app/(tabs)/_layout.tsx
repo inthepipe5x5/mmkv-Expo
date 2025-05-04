@@ -41,13 +41,7 @@ export const TabLayoutRouteMapping = [{
   },
   icon: "square.plus",
 },
-{
-  name: 'camera',
-  options: {
-    title: 'camera',
-  },
-  icon: "camera",
-}] as TabLayoutRoute[];
+] as TabLayoutRoute[];
 
 export default function TabLayout() {
 
@@ -55,7 +49,7 @@ export default function TabLayout() {
     <Stack
       screenOptions={{
         // tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
+        // headerShown: false,
         // tabBarButton: HapticTab,
         // tabBarBackground: TabBarBackground,
         // tabBarStyle: Platform.select({
