@@ -1,9 +1,35 @@
 module.exports = function (api) {
   api.cache(true);
+
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      [
+        "babel-preset-expo",
+        {
+          jsxImportSource: "nativewind",
+        },
+      ],
+      '@babel/preset-typescript',
+      "nativewind/babel",
+    ],
+
     plugins: [
-      "react-native-reanimated/plugin" // Must be listed last in the plugins array
-    ]
+      [
+        "module-resolver",
+        {
+          root: ["./"],
+
+          alias: {
+            "@": "./",
+            "@screens": "./screens",
+            "@gs": "./components/ui",
+            "tailwind.config": "./tailwind.config.js",
+          },
+        },
+      ],
+      'react-native-reanimated/plugin', //ensure this is last
+    ],
+    sourceMaps: true, // Enable source maps for better debugging
+    comments: false, // Disable comments in the output code
   };
 };
