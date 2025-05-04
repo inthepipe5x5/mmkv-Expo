@@ -12,6 +12,7 @@ import { Colors } from '@/constants/Colors';
 import { RelativePathString, Stack, useRouter } from 'expo-router';
 import { TabLayoutRouteMapping } from './_layout';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import SVGImage from '@/components/SVGImage';
 
 
 
@@ -26,15 +27,17 @@ export default function HomeScreen() {
     sheetRef.current?.resize(2);
   }
 
-
   return (
     <ParentContainer style={{ flex: 1 }}>
       <ParallaxScrollView
         headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
         headerImage={
-          <Image
-            source={require('@/assets/images/partial-react-logo.png')}
-            style={styles.reactLogo}
+          // <Image
+          //   source={require('@/assets/images/partial-react-logo.png')}
+          //   style={styles.reactLogo}
+          // />
+          <SVGImage
+            uri={require('@/assets/svg/feedback/creative-draft.svg')}
           />
         }>
         <Stack
@@ -64,6 +67,9 @@ export default function HomeScreen() {
               onPress={() => router.push('/camera')}
               color={Colors[colorScheme ?? 'light'].tint}
               accessibilityLabel="Open Bottom Sheet"
+            />
+            <SVGImage
+              uri={require('@/assets/svg/feedback/creative-draft.svg')}
             />
           </View>
           <ThemedText>
