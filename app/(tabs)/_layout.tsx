@@ -1,64 +1,118 @@
-import { Tabs } from 'expo-router';
+import { Stack, Slot, useRouter } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol, MAPPING } from '@/components/ui/IconSymbol';
+import { IconSymbol, IconSymbolName, MAPPING } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { MaterialIcons } from '@expo/vector-icons';
 
+import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+
+type TabLayoutRoute = {
+  name: string;
+  options?: NativeStackNavigationOptions;
+  icon: IconSymbolName;
+};
+export const TabLayoutRouteMapping = [{
+  name: 'index',
+  options: {
+    title: 'Home',
+  },
+  icon: "house.fill",
+}, {
+  name: 'explore',
+  options: {
+    title: 'Explore',
+  },
+  icon: "paperplane.fill",
+}, {
+  name: 'task',
+  options: {
+    title: 'Task',
+  },
+  icon: "chevron.left.forwardslash.chevron.right",
+}, {
+  name: 'create-tasks',
+  options: {
+    title: 'Create Task',
+  },
+  icon: "square.plus",
+},
+{
+  name: 'camera',
+  options: {
+    title: 'camera',
+  },
+  icon: "camera",
+}] as TabLayoutRoute[];
+
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <Stack
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        // tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        // tabBarButton: HapticTab,
+        // tabBarBackground: TabBarBackground,
+        // tabBarStyle: Platform.select({
+        //   ios: {
+        //     // Use a transparent background on iOS to show the blur effect
+        //     position: 'absolute',
+        //   },
+        //   default: {},
+        // }),
       }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="task"
-        options={{
-          tabBarIcon: ({ color, focused, size }) => {
-            const iconName = focused ? MAPPING['c.circle.fill'] : MAPPING['c.circle'];
-            return <IconSymbol size={size} name={iconName as typeof MaterialIcons['name']} color={color} />;
-          }
-        }}
-      />
-      <Tabs.Screen
-        name="create-task"
-        options={{
-          tabBarIcon: ({ color, focused, size }) => {
-            const iconName = focused ? MAPPING['square.fill'] : MAPPING['square'];
-            return <IconSymbol size={size} name={iconName as typeof MaterialIcons['name']} color={color} />;
-          }
-        }}
-      />
-    </Tabs>
+      {TabLayoutRouteMapping.map((route, index) => (
+        <Stack.Screen
+          key={index}
+          name={route.name}
+          options={route.options}
+        />
+      ))}
+      {/* <Stack.Screen
+          name="index"
+          options={{
+            title: 'Home',
+            // tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          }}
+        />
+        <Stack.Screen
+          name="explore"
+          options={{
+            title: 'Explore',
+            // tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          }}
+        />
+        <Stack.Screen
+          name="task"
+        // options={{
+        // tabBarIcon: ({ color, focused, size }) => {
+        //   const iconName = focused ? 'c.circle.fill' : 'c.circle';
+        //   return <IconSymbol size={size} name={iconName} color={color} />;
+        // }
+        // }}
+        />
+        <Stack.Screen
+          name="create-tasks"
+        // options={{
+        // tabBarIcon: ({ color, focused, size }) => {
+        //   const iconName = 'outgoing-mail'
+        //   return <IconSymbol size={size} name={iconName} color={color} />;
+        // }
+        // }}
+        /> */}
+      {/* <Stack.Screen
+        name="camera"
+      // options={{
+      //   // title: 'Scan',
+      //   headerShown: false,
+      //   tabBarIcon: ({ color }) => <IconSymbol size={28} name="qrcode" color={color} />,
+      // }}
+      /> */}
+    </Stack>
   );
 }
