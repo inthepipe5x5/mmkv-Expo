@@ -149,6 +149,18 @@ export default function HomeScreen() {
                 <Text>Open Camera</Text>
               </View>
             </Pressable>
+            <Pressable
+              style={{ padding: 10, marginHorizontal: 5 }}
+              android_ripple={{ color: Colors[colorScheme ?? 'light'].tint }}
+              onPress={() => {
+                sheetRef.current?.resize(1);
+                router.push('/camera/codeScanner')
+              }}>
+              <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
+                <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].tint} />
+                <Text>Open Barcode Scanner</Text>
+              </View>
+            </Pressable>
           </ScrollView>
         </TrueSheet>
       </ParallaxScrollView>
