@@ -6,20 +6,36 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/app/*": ["./app/*"],
-      "@/assets/*": ["./assets/*"],
-      "@/screens/*": ["./screens/*"],
+      "@/*": [
+        "./*"
+      ],
+      "@/app/*": [
+        "./app/*"
+      ],
+      "@/assets/*": [
+        "./assets/*"
+      ],
+      "@/screens/*": [
+        "./screens/*"
+      ],
       "@/components/*": [
         "./components/*"
       ],
-      "@/utils/*": ["./utils/*"],
+      "@/utils/*": [
+        "./utils/*"
+      ],
       "@/constants/*": [
         "./constants/*"
       ],
-      "@/hooks/*": ["./hooks/*"],
-      "@gs": ["./components/ui/*"],
-      "@/lib/*": ["./lib/*"],
+      "@/hooks/*": [
+        "./hooks/*"
+      ],
+      "@gs": [
+        "./components/ui/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
       "tailwind.config": [
         "./tailwind.config.js"
       ]
