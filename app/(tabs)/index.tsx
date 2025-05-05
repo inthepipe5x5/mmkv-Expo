@@ -8,12 +8,14 @@ import { ThemedView } from '@/components/ThemedView';
 import CacheTestText from '@/components/CacheTestText';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
-import { Colors } from '@/constants/Colors';
+import { Colors, light, dark } from '@/constants/Colors';
 import { RelativePathString, Stack, useRouter } from 'expo-router';
 import { TabLayoutRouteMapping } from './_layout';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import SVGImage from '@/components/SVGImage';
 import { useRootContext } from '../_layout';
+import CuratedImage from '@/components/CuratedImage';
+import { viewPort } from '@/constants/dimensions';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -31,14 +33,17 @@ export default function HomeScreen() {
   return (
     <ParentContainer style={{ flex: 1 }}>
       <ParallaxScrollView
-        headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+        headerBackgroundColor={{ light: light.background, dark: dark.background }}//{ light: '#A1CEDC', dark: '#1D3D47' }}
         headerImage={
+          <CuratedImage
           // <Image
           //   source={require('@/assets/images/partial-react-logo.png')}
           //   style={styles.reactLogo}
           // />
-          <SVGImage
-            uri={require('@/assets/svg/feedback/creative-draft.svg')}
+          // <SVGImage
+          //   // uri={require('@/assets/svg/feedback/creative-draft.svg')}
+          //   uri={Pexels.get}
+          // />
           />
         }>
         <Stack
@@ -58,7 +63,7 @@ export default function HomeScreen() {
             <Button
               title="Open Bottom Sheet"
               onPress={ShowBottomSheet}
-              color={Colors[colorScheme ?? 'light'].tint}
+              color={Colors[colorScheme ?? 'light'].accent}
               accessibilityLabel="Open Bottom Sheet"
             />
           </View>
@@ -66,7 +71,7 @@ export default function HomeScreen() {
             <Button
               title="Open Camera"
               onPress={() => router.push('/camera')}
-              color={Colors[colorScheme ?? 'light'].tint}
+              color={Colors[colorScheme ?? 'light'].accent}
               accessibilityLabel="Open Bottom Sheet"
             />
             <SVGImage
@@ -75,13 +80,13 @@ export default function HomeScreen() {
           </View>
           <Pressable
             style={{ padding: 10, marginHorizontal: 5 }}
-            android_ripple={{ color: Colors[colorScheme ?? 'light'].tint }}
+            android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
             onPress={() => {
               sheetRef.current?.resize(1);
               router.push('/camera/codeScanner')
             }}>
             <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
-              <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].tint} />
+              <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].accent} />
               <Text>Open Barcode Scanner</Text>
             </View>
           </Pressable>
@@ -142,7 +147,7 @@ export default function HomeScreen() {
             contentContainerStyle={{
               justifyContent: 'center',
               alignItems: 'center',
-              height: '100%'
+              minHeight: viewPort.devices.mobile.height,
             }}>
             <View style={{ justifyContent: 'center' }}>
               <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Scanned Barcodes</Text>

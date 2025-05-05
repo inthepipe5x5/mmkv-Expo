@@ -85,6 +85,7 @@
     "react-native-reanimated": "^3.16.2",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "~4.4.0",
+    "react-native-static-safe-area-insets": "^2.2.0",
     "react-native-svg": "^15.11.2",
     "react-native-vision-camera": "^4.6.4",
     "react-native-vision-camera-barcodes-scanner": "^2.0.1",

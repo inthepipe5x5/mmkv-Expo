@@ -24,6 +24,7 @@ import { useRunOnJS } from "react-native-worklets-core";
 import normalizeBarcode, { CalculateWithinOverlay } from "@/utils/barcode";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { Barcode } from "react-native-vision-camera-barcodes-scanner/lib/typescript/src/types";
+import PromptText, { PromptTextProps } from "@/components/PromptText";
 
 export const defaultCodeTypes = (defaultOverride?: CodeType[]) => {
     if (defaultOverride) return defaultOverride as CodeType[];
@@ -74,6 +75,7 @@ export const defaultCodeTypes = (defaultOverride?: CodeType[]) => {
 
 //     return { devices, device, permission, format };
 // }
+const DEBOUNCE_TIME = 3000 //3 seconds to handle the "constant" messy barcodes being scanned when it's in frame
 
 export default function CodeScannerScreen() {
     const device = useCameraDevice('back') as CameraDevice | undefined;
@@ -82,7 +84,10 @@ export default function CodeScannerScreen() {
     const resultSheetRef = React.useRef<TrueSheet>(null);
     const scrollRef = React.useRef<ScrollView>(null);
     const [openSheet, setOpenSheet] = React.useState<boolean>(false);
-
+    const [messyBarcodes, setMessyBarcodes] = React.useState<{ [key: string]: number }>({});
+    const [likelyBarcodes, setLikelyBarcodes] = React.useState<Set<string>>(new Set<string>());
+    const [prompt, setPrompt] = React.useState<PromptTextProps | null>(null);
+    //#region effects
     useEffect(() => {
         const handleOpenSheet = async () => {
             if (resultSheetRef.current !== null && openSheet) {
@@ -91,7 +96,74 @@ export default function CodeScannerScreen() {
         }
         handleOpenSheet();
 
+    }, []);
+
+    const handleScannedMessyBarcodes = React.useCallback(({ value }: Code) => {
+        if (typeof value !== 'string') {
+            setPrompt({
+                promptText: "Invalid barcode value"
+                , promptType: "error"
+            })
+            return
+        };
+        const normalizedValue = normalizeBarcode(value);
+        setMessyBarcodes(prev => ({
+            ...prev,
+            [normalizedValue]: (prev[normalizedValue] || 0) + 1
+        }));
     }, [])
+    //find the most frequent barcode in the messyBarcodes object and set it to likelyBarcodes
+    useEffect(() => {
+        if (Object.keys(messyBarcodes).length === 0) {
+            setPrompt({
+                promptText: "No barcodes scanned detected yet. Try again.",
+                promptType: "info"
+            });
+            return;
+        };
+
+        if (Object.keys(messyBarcodes).length > 0) {
+            setPrompt({
+                promptText: "Scanning...",
+                promptType: "info"
+            });
+            const debouncedScan = setTimeout(() => {
+                const mostFrequentBarcode = Object.keys(messyBarcodes).reduce((a, b) => messyBarcodes[a] > messyBarcodes[b] ? a : b);
+                const barcodeCount = messyBarcodes[mostFrequentBarcode];
+                console.log("mostFrequentBarcode", { mostFrequentBarcode, barcodeCount });
+                //update state and cache the result 
+                likelyBarcodes.add(mostFrequentBarcode);
+                setLikelyBarcodes(likelyBarcodes);
+                addNewBarcode(mostFrequentBarcode);
+
+                //clear the messy barcodes
+                setMessyBarcodes({});
+                setPrompt({
+                    promptText: `Scanned new barcode: ${mostFrequentBarcode} (${barcodeCount} times)`,
+                    promptType: "success"
+                });
+            }, DEBOUNCE_TIME);
+
+            return () => {
+                clearTimeout(debouncedScan)
+                setMessyBarcodes({});
+                setPrompt(null);
+            };
+        }
+
+    }, [messyBarcodes])
+
+    //clean up prompts
+    useEffect(() => {
+        if (prompt === null) return;
+        const timeout = setTimeout(() => {
+            setPrompt(null);
+        }, DEBOUNCE_TIME);
+        return () => clearTimeout(timeout);
+
+    }, [prompt])
+
+    //#endregion effects
     // const ScanOverlay = useSkiaFrameProcessor((frame) => {
     //     'worklet';
     //     frame.render();
@@ -126,18 +198,24 @@ export default function CodeScannerScreen() {
     if (!!!device) {
         return <Redirect href="/camera/no-devices" />;
     }
+    //#region Scanner
     const codeScanner = useCodeScanner({
         codeTypes: defaultCodeTypes(),
         onCodeScanned: (codes: Code[]) => {
-            //do nothing if the code is already scanned 
-            if (codes.length === 0 || !!codes[0]?.value && normalizeBarcode(codes[0]?.value) in scannedBarcodes) return;
-            console.log("Scanned codes", codes.map((code) => JSON.stringify(code, null, 4)));
-
-            if (typeof codes[0]?.value === 'string' && !(normalizeBarcode(codes[0]?.value) in scannedBarcodes))
-                addNewBarcode(codes[0]?.value as string);
+            if (codes.length === 0) return;
+            codes.forEach((code) => {
+                //handle a unique barcode with a truthy value
+                if (typeof code.value === 'string' && !(likelyBarcodes.has(code.value))) handleScannedMessyBarcodes(code);
+            })
         }
     })
+    //#endregion Scanner
+    //#region prompts
 
+    //#endregion prompts
+
+
+    //#region jsx
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <Camera
@@ -149,8 +227,11 @@ export default function CodeScannerScreen() {
                 // frameProcessor={barcodeFrameProcessor}
                 photoQualityBalance="speed"
                 format={device.formats[0]}
-                
+
             />
+            {
+                prompt !== null ? <PromptText {...prompt} /> : null
+            }
             <TrueSheet
                 name="codeScannerResultSheet"
                 ref={resultSheetRef}
