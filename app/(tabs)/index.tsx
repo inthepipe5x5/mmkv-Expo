@@ -36,6 +36,7 @@ export default function HomeScreen() {
         headerBackgroundColor={{ light: light.background, dark: dark.background }}//{ light: '#A1CEDC', dark: '#1D3D47' }}
         headerImage={
           <CuratedImage
+          />
           // <Image
           //   source={require('@/assets/images/partial-react-logo.png')}
           //   style={styles.reactLogo}
@@ -44,7 +45,6 @@ export default function HomeScreen() {
           //   // uri={require('@/assets/svg/feedback/creative-draft.svg')}
           //   uri={Pexels.get}
           // />
-          />
         }>
         <Stack
           screenOptions={{
@@ -112,7 +112,7 @@ export default function HomeScreen() {
         {/* <ThemedView style={styles.stepContainer}>
 
         </ThemedView> */}
-        <TrueSheet
+        {/* <TrueSheet
           name="landingPageSheet"
           ref={sheetRef}
           initialIndex={1}
@@ -158,9 +158,9 @@ export default function HomeScreen() {
               ) : (
                 <Text>No barcodes scanned yet.</Text>
               )} */}
-            </View>
+        {/* </View>
           </ScrollView>
-        </TrueSheet>
+        </TrueSheet> */}
       </ParallaxScrollView>
     </ParentContainer >
 

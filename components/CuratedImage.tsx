@@ -5,8 +5,8 @@ import { Text, View } from "react-native";
 
 export type CuratedImageProps = {
     imageTitle?: string;
-    imageSize: "tiny" | "portrait" | "landscape" | "small" | "medium" | "large" | "large2x" | "original";
-    imageHeight: number;
+    imageSize?: "tiny" | "portrait" | "landscape" | "small" | "medium" | "large" | "large2x" | "original";
+    imageHeight?: number;
 }
 /** Renders a "random" curated image from Pexels.
  * 
