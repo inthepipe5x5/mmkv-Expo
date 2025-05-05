@@ -13,7 +13,7 @@ import { RelativePathString, Stack, useRouter } from 'expo-router';
 import { TabLayoutRouteMapping } from './_layout';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import SVGImage from '@/components/SVGImage';
-import { useRootContext } from '../_layout';
+import { useStorageContext } from '@/components/contexts/StorageProvider';
 import CuratedImage from '@/components/CuratedImage';
 import { viewPort } from '@/constants/dimensions';
 
@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const ParentContainer = Platform.OS === 'web' ? View : GestureHandlerRootView
   const sheetRef = useRef<TrueSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
-  const { cache } = useRootContext();
+  const { cache } = useStorageContext();
   const router = useRouter();
   const [barcodes, setBarcodes] = React.useState<string[]>([]);
 

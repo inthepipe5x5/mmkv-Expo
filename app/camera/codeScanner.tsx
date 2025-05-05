@@ -11,7 +11,7 @@ import {
     useCodeScanner,
     // useCodeScanner
 } from "react-native-vision-camera"
-import { useRootContext } from "@/app/_layout";
+import { useStorageContext }  from "@/components/contexts/StorageProvider";
 import { Redirect } from "expo-router";
 import { Alert, View, Text, TouchableOpacity, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -79,7 +79,7 @@ const DEBOUNCE_TIME = 3000 //3 seconds to handle the "constant" messy barcodes b
 
 export default function CodeScannerScreen() {
     const device = useCameraDevice('back') as CameraDevice | undefined;
-    // const { cache } = useRootContext();
+    // const { cache } = useStorageContext();
     const { addNewBarcode, scannedBarcodes } = useCameraContext();
     const resultSheetRef = React.useRef<TrueSheet>(null);
     const scrollRef = React.useRef<ScrollView>(null);

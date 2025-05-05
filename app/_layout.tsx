@@ -8,59 +8,20 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useMemo } from "react";
 import { GeneralCache } from "@/lib/mmkv/index"
+import { StorageContextProvider } from '@/components/contexts/StorageProvider';
+import { AuthProvider } from '@/components/contexts/SupabaseProvider';
+import { GluestackUIProvider, ModeType } from "@/components/ui/gluestack-ui-provider";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { mmkvGeneralPersister } from "@/lib/mmkv/persister";
+import { Appearance } from 'react-native';
 
-const RootContext = createContext<{
-  cache: GeneralCache;
-  randomNumber: number | null;
-  setRandomNumber: (value: number | null) => void;
-} | null>(null);
-
-const RootContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const cache = useMemo(() => new GeneralCache({}), []);
-  const [randomNumber, setRandomNumber] = useState<number | null>(null);
-  console.log('Pre-fetch random number:', { randomNumber });
-
-  useEffect(() => {
-    const previousNumber = cache.getItem('randomNumber');
-    console.log('Previous random number from cache:', { previousNumber: previousNumber ?? null });
-    //check if previously set random number is falsy
-    if (!!!previousNumber) {
-      const randomValue = Math.floor(Math.random() * 100);
-      setRandomNumber(randomValue);
-      cache.setItem('randomNumber', randomValue.toString());
-      cache.setItem('randomNumberTimestamp', new Date().toISOString());
-      console.log('Random number set:', { randomValue, timestamp: new Date().toISOString() });
-    }
-    //check if previously set random number is not falsy
-    else {
-      setRandomNumber(parseInt(previousNumber));
-      console.log('Random number retrieved from cache:', { previousNumber });
-    }
-  }, []);
-
-  return (
-    <RootContext.Provider value={{
-      cache,
-      randomNumber,
-      setRandomNumber,
-    }}>
-      {children}
-    </RootContext.Provider >
-  );
-}
-export const useRootContext = () => {
-  const context = useContext(RootContext);
-  if (!context) {
-    throw new Error('useRootContext must be used within a RootContextProvider');
-  }
-  return context;
-}
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
+//#region RootLayout
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = Appearance.getColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -68,7 +29,6 @@ export default function RootLayout() {
 
 
   useEffect(() => {
-    console.log('MMKV storage:', GeneralCache);
     // Hide the splash screen once the app is ready
     if (loaded) {
       SplashScreen.hideAsync();
@@ -79,15 +39,50 @@ export default function RootLayout() {
     return null;
   }
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        retry: 1,
+        gcTime: 1000 * 60 * 60 * 2, // 2 hours
+      },
+      mutations: {
+        retry: 1,
+      },
+    },
+  })
+
+
   return (
-    <RootContextProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </RootContextProvider>
+    // <RootContextProvider>
+    <StorageContextProvider>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: mmkvGeneralPersister
+        }}
+        onError={() => { //for debugging
+          console.error("Error persisting query client")
+        }}
+        onSuccess={() => { //for debugging
+          console.log("Query client persisted successfully")
+        }}
+      >
+        <GluestackUIProvider mode={"system" as ModeType}>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <AuthProvider>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              <StatusBar style="auto" />
+            </AuthProvider>
+          </ThemeProvider>
+        </GluestackUIProvider>
+      </PersistQueryClientProvider>
+    </StorageContextProvider>
+    // </RootContextProvider>
   );
 }

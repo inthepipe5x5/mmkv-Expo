@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useRouter, useLocalSearchParams, RelativePathString, Redirect } from "expo-router";
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from "react-native";
 import { Camera, CameraPermissionStatus, useCameraPermission } from "react-native-vision-camera";
-import { useRootContext } from "@/app/_layout";
+import { useStorageContext }  from "@/components/contexts/StorageProvider";
 import { useIsFocused } from "@react-navigation/native";
 
 export default function GrantPermissionPage() {
@@ -11,7 +11,7 @@ export default function GrantPermissionPage() {
     const router = useRouter();
     const { hasPermission, requestPermission } = useCameraPermission();
     const viewVisible = router.canGoBack();
-    const { cache } = useRootContext();
+    const { cache } = useStorageContext();
     const [cameraPermission, setCameraPermission] = React.useState<boolean | null>(null);
     const { title, message, dismissPath } = useLocalSearchParams<{
         title?: string[];

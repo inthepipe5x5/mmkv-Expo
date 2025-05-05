@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { Pexels } from "@/lib/pexels";
 import { Image } from "expo-image";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 
 export type CuratedImageProps = {
     imageTitle?: string;
@@ -31,8 +31,10 @@ export default function CuratedImage({ imageTitle, imageSize = "original", image
     }, [])
 
     return (
-        <Suspense fallback={<Text>Loading...</Text>}
-        > <Image
+        // <Suspense fallback={<Text>Loading...</Text>}
+        // > 
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Image
                 source={{ uri: image }}
                 style={{
                     width: "100%",
@@ -48,6 +50,7 @@ export default function CuratedImage({ imageTitle, imageSize = "original", image
                 cachePolicy={"memory-disk"}
             />
             {!!imageTitle ? (<Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>props?.imageTitle </Text>) : null}
-        </Suspense>
+        </View>
+        // </Suspense>
     )
 }

@@ -1,4 +1,4 @@
-import { useRootContext } from "@/app/_layout";
+import { useStorageContext }  from "@/components/contexts/StorageProvider";
 import { useCameraContext } from "@/components/contexts/CameraContext";
 import { Redirect } from "expo-router";
 import React from "react";
@@ -37,7 +37,7 @@ import {
 export default function CameraScreen() {
     const device = useCameraDevice('back') as CameraDevice | undefined;
 
-    const { cache } = useRootContext();
+    const { cache } = useStorageContext();
     const { cameraPermission } = useCameraContext();
     cache.setItem("cameraPermission", cameraPermission === true ? "granted" : "denied");
 

@@ -3,7 +3,7 @@ import { StyleSheet, ImageBackground, ImageBackgroundProps, Button } from "react
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useRootContext } from "@/app/_layout";
+import { useStorageContext }  from "@/components/contexts/StorageProvider";
 import { fakeTask, fakeProduct } from "@/lib/__MOCK__/productTasks";
 import { Collapsible } from "@/components/Collapsible";
 
@@ -15,7 +15,7 @@ const customImageBg = (props: Partial<ImageBackgroundProps>) => {
 const HEADER_HEIGHT = 250;
 
 export default function TaskScreen() {
-    const { cache } = useRootContext();
+    const { cache } = useStorageContext();
     const [currentTask, setCurrentTask] = React.useState<null | typeof fakeTask>(null);
     const [currentProduct, setCurrentProduct] = React.useState<null | typeof fakeProduct>(null);
 

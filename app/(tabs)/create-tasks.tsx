@@ -3,7 +3,7 @@ import { StyleSheet, ImageBackground, ImageBackgroundProps, Button, Pressable, K
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useRootContext } from "@/app/_layout";
+import { useStorageContext } from "@/components/contexts/StorageProvider";
 import { fakeTask, fakeProduct } from "@/lib/__MOCK__/productTasks";
 import { Collapsible } from "@/components/Collapsible";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -28,7 +28,7 @@ const defaultValues = {
 const CreateTask = (initialFormValues: Partial<task> = defaultValues) => {
     const [formValues, setFormValues] = React.useState<Partial<task>>(initialFormValues);
     const [datePickerKey, setDatePickerKey] = React.useState<null | keyof task>(null);
-    const { cache } = useRootContext();
+    const { cache } = useStorageContext();
 
     const handleDateConfirmation = (date: Date) => {
         if (!!datePickerKey) {

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useContext, createContext, useEffect } from "react";
 import { Camera, CameraDevice, CameraPermissionStatus, useCameraPermission } from "react-native-vision-camera";
-import { useRootContext } from "@/app/_layout";
+import { useStorageContext }  from "@/components/contexts/StorageProvider";
 import { useIsFocused } from "@react-navigation/native";
 import { Alert, Linking } from "react-native";
 import normalizeBarcode from "@/utils/barcode";
@@ -36,7 +36,7 @@ export const useCameraContext = () => {
  * @returns 
  */
 export const CameraProvider = ({ children }: { children: React.ReactNode }) => {
-    const { cache } = useRootContext();
+    const { cache } = useStorageContext();
     const isFocused = useIsFocused();
     const devices = Camera.getAvailableCameraDevices() as CameraDevice[] | null;
     const { hasPermission } = useCameraPermission();

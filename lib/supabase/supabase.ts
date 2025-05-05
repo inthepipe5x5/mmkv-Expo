@@ -1,5 +1,4 @@
 import { AppState, Platform } from "react-native";
-import "react-native-url-polyfill/auto";
 import { createClient, SupabaseClientOptions, RealtimeMessage, RealtimeClientOptions } from "@supabase/supabase-js";
 import { GeneralCache } from "@/lib/mmkv/index";
 

@@ -1,12 +1,14 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { GeneralCache } from '@/lib/mmkv/index';
+//#region create context
 export const StorageContext = createContext<{
     initialized: boolean;
     setInitialized: (value: boolean) => void;
     cache: GeneralCache;
 } | null>(null);
-
+// #endregion create context
+// #region provider
 export const StorageContextProvider = ({ children }: { children: React.ReactNode }) => {
     const cache = useMemo(() => new GeneralCache({}), []);
     const [initialized, setInitialized] = useState(false);
@@ -30,7 +32,8 @@ export const StorageContextProvider = ({ children }: { children: React.ReactNode
         </StorageContext.Provider >
     );
 }
-
+// #endregion provider
+// #region hook
 export const useStorageContext = () => {
     const context = useContext(StorageContext);
     if (!context) {
@@ -38,3 +41,4 @@ export const useStorageContext = () => {
     }
     return context;
 }
+// #endregion hook
