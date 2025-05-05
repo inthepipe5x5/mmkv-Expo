@@ -1,12 +1,15 @@
-import React from "react";
-import { Platform } from "react-native";
+import React, { useCallback, useEffect } from "react";
+import { Platform, ScrollView } from "react-native";
 import {
     Camera,
     CameraDevice, useCameraDevice,
     CodeScanner,
     CodeType, useSkiaFrameProcessor,
     Code,
-    useCodeScanner
+    useFrameProcessor,
+    Frame,
+    useCodeScanner,
+    // useCodeScanner
 } from "react-native-vision-camera"
 import { useRootContext } from "@/app/_layout";
 import { Redirect } from "expo-router";
@@ -15,7 +18,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useIsFocused } from "@react-navigation/native";
 import { Skia, BlendMode, add } from '@shopify/react-native-skia';
 import { useCameraContext } from "@/components/contexts/CameraContext";
+import { useBarcodeScanner } from "react-native-vision-camera-barcodes-scanner";
+import { useRunOnJS } from "react-native-worklets-core";
+
 import normalizeBarcode, { CalculateWithinOverlay } from "@/utils/barcode";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import { Barcode } from "react-native-vision-camera-barcodes-scanner/lib/typescript/src/types";
+
 export const defaultCodeTypes = (defaultOverride?: CodeType[]) => {
     if (defaultOverride) return defaultOverride as CodeType[];
 
@@ -41,7 +50,8 @@ export const defaultCodeTypes = (defaultOverride?: CodeType[]) => {
     if (Platform.OS === 'ios') {
         codes.push('itf-14');
     }
-    console.log("defaultCodeTypes", { codes });
+    //for debugging purposes
+    // console.log("defaultCodeTypes", { codes });
     return codes as CodeType[]
 }
 
@@ -69,7 +79,19 @@ export default function CodeScannerScreen() {
     const device = useCameraDevice('back') as CameraDevice | undefined;
     // const { cache } = useRootContext();
     const { addNewBarcode, scannedBarcodes } = useCameraContext();
+    const resultSheetRef = React.useRef<TrueSheet>(null);
+    const scrollRef = React.useRef<ScrollView>(null);
+    const [openSheet, setOpenSheet] = React.useState<boolean>(false);
 
+    useEffect(() => {
+        const handleOpenSheet = async () => {
+            if (resultSheetRef.current !== null && openSheet) {
+                await resultSheetRef.current?.resize(1);
+            }
+        }
+        handleOpenSheet();
+
+    }, [])
     // const ScanOverlay = useSkiaFrameProcessor((frame) => {
     //     'worklet';
     //     frame.render();
@@ -93,7 +115,13 @@ export default function CodeScannerScreen() {
     //     clearPaint.setBlendMode(BlendMode.Clear);
     //     frame.drawRect(Skia.XYWHRect(rectX, rectY, rectWidth, rectHeight), clearPaint);
     // }, []);
+    // const parseFrame = useCallback((frame: Frame) => {
 
+    //     const codes = scanBarcodes(frame) as Barcode[];
+    //     if (codes.length === 0) return;
+    //     //do nothing if the code is already scanned
+
+    // }, [])
 
     if (!!!device) {
         return <Redirect href="/camera/no-devices" />;
@@ -102,32 +130,11 @@ export default function CodeScannerScreen() {
         codeTypes: defaultCodeTypes(),
         onCodeScanned: (codes: Code[]) => {
             //do nothing if the code is already scanned 
-            if (codes.length === 0 || codes.every(code => !!code?.value && Object.keys(scannedBarcodes).includes(normalizeBarcode(code?.value)))) {
-                console.log("Already scanned", codes.map((code) => JSON.stringify(code, null, 4)));
-                return;
-            };
+            if (codes.length === 0 || !!codes[0]?.value && normalizeBarcode(codes[0]?.value) in scannedBarcodes) return;
             console.log("Scanned codes", codes.map((code) => JSON.stringify(code, null, 4)));
-            // if ([codes, typeof codes?.value === 'string'].every(Boolean)) {
-            //     addNewBarcode(codes.value as string);
-            // }
-            // if (!!!codes) return;
-            // const filteredCodes = codes.filter((code) => {
 
-            //     if (Platform.OS === 'android') {
-            //         return CalculateWithinOverlay({ code })
-            //     }
-            //     return code.value && typeof code.value === 'string' && code.type in defaultCodeTypes();
-            // }) ?? []
-            // if (filteredCodes.length === 0) return;
-
-            // //add barcodes to stored context value
-            // filteredCodes.map((code) => {
-            //     const barcode = code.value as string;
-            //     addNewBarcode(barcode);
-            //     Alert.alert("Scanned Barcode", barcode, [
-            //         { text: "OK", onPress: () => console.log("OK Pressed") }
-            //     ]);
-            // })
+            if (typeof codes[0]?.value === 'string' && !(normalizeBarcode(codes[0]?.value) in scannedBarcodes))
+                addNewBarcode(codes[0]?.value as string);
         }
     })
 
@@ -139,8 +146,43 @@ export default function CodeScannerScreen() {
                 // frameProcessor={ScanOverlay}
                 style={{ flex: 1 }}
                 codeScanner={codeScanner}
+                // frameProcessor={barcodeFrameProcessor}
                 photoQualityBalance="speed"
+                format={device.formats[0]}
+                
             />
+            <TrueSheet
+                name="codeScannerResultSheet"
+                ref={resultSheetRef}
+                style={{ backgroundColor: 'white', padding: 20, minHeight: '100%' }}
+                sizes={['20%', '50%', '90%']}
+                initialIndex={0}
+                initialIndexAnimated={Platform.OS === 'ios'}
+                dimmedIndex={1}
+                dismissible={false}
+                onDismiss={() => setOpenSheet(false)}
+                edgeToEdge={Platform.OS === 'android'}
+
+            >
+                <ScrollView nestedScrollEnabled ref={scrollRef}
+                    contentContainerStyle={{
+                        // justifyContent: 'center',
+                        // alignItems: 'center',
+                        // backgroundColor: "black"
+                        height: '100%',
+                    }}>
+                    <View>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Scanned Barcodes</Text>
+                        {Object.keys(scannedBarcodes).length > 0 ? (
+                            Object.keys(scannedBarcodes).map((barcode, index) => (
+                                <Text key={barcode} style={{ marginVertical: 5 }}>Barcode #{index + 1}{barcode}</Text>
+                            ))
+                        ) : (
+                            <Text>No barcodes scanned yet.</Text>
+                        )}
+                    </View>
+                </ScrollView>
+            </TrueSheet>
         </SafeAreaView >
     );
 }

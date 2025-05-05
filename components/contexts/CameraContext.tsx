@@ -5,9 +5,8 @@ import { useIsFocused } from "@react-navigation/native";
 import { Alert, Linking } from "react-native";
 import normalizeBarcode from "@/utils/barcode";
 
-
 export type scannedBarcodeType = {
-    [key: string]: Date
+    [key: string]: string;
 }
 type CameraContextValue = {
     cameraPermission: boolean | null;
@@ -71,7 +70,7 @@ export const CameraProvider = ({ children }: { children: React.ReactNode }) => {
         //set the scanned barcode to the state
         setScannedBarcodes((prevState) => ({
             ...prevState,
-            [normalizedBarcode]: new Date(timestamp)
+            [normalizedBarcode]: timestamp
         }));
         //sync with cache
         cache.setItem("scannedBarcodes", JSON.stringify(scannedBarcodes));

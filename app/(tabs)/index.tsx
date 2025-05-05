@@ -13,15 +13,16 @@ import { RelativePathString, Stack, useRouter } from 'expo-router';
 import { TabLayoutRouteMapping } from './_layout';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import SVGImage from '@/components/SVGImage';
-
-
+import { useRootContext } from '../_layout';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const ParentContainer = Platform.OS === 'web' ? View : GestureHandlerRootView
   const sheetRef = useRef<TrueSheet>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const { cache } = useRootContext();
   const router = useRouter();
-
+  const [barcodes, setBarcodes] = React.useState<string[]>([]);
 
   const ShowBottomSheet = () => {
     sheetRef.current?.resize(2);
@@ -103,76 +104,56 @@ export default function HomeScreen() {
             Tap the Explore tab to learn more about what's included in this starter app.
           </ThemedText>
         </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-          <ThemedText>
-            When you're ready, run{' '}
-            <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-            <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-            <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-            <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-          </ThemedText>
-        </ThemedView>
+        {/* <ThemedView style={styles.stepContainer}>
+
+        </ThemedView> */}
         <TrueSheet
+          name="landingPageSheet"
           ref={sheetRef}
           initialIndex={1}
           initialIndexAnimated={Platform.OS === 'ios'}
           sizes={['20%', '50%', '85%']}
+          onMount={() => {
+            const cachedBarcodes = cache.getItem('scannedBarcodes') ?? null;
+            console.log('Sheet mounted, cached barcodes:', cachedBarcodes);
+            switch (true) {
+              case cachedBarcodes === null:
+                console.log('No cached barcodes found');
+                break;
+              default:
+                setBarcodes(cachedBarcodes as unknown as string[]);
+            }
+          }}
+          onPresent={() => {
+            const cachedBarcodes = cache.getItem('scannedBarcodes') ?? null;
+            console.log('Sheet mounted, cached barcodes:', cachedBarcodes);
+            switch (true) {
+              case cachedBarcodes === null:
+                console.log('No cached barcodes found');
+                break;
+              default:
+                setBarcodes(cachedBarcodes as unknown as string[]);
+            }
+          }}
         >
           <ScrollView
-            style={{ flexDirection: 'row', padding: 10 }}>
-            {TabLayoutRouteMapping.map((route, index) => (
-              <Pressable
-                key={index}
-                // name={route.name}
-                // options={route.options}
-                style={{ padding: 10, marginHorizontal: 5 }}
-                android_ripple={{ color: Colors[colorScheme ?? 'light'].tint }}
-                onPress={() => {
-                  sheetRef.current?.resize(2);
-                  console.log('Tab pressed:', route.name);
-                  router.push(route.name as RelativePathString);
-                }}
-              >
-                <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
-                  {/* <IconSymbol
-                    size={28}
-                    name={MAPPING[route.icon] as SFSymbols6_0 ?? 'map'}
-                    color={Colors[colorScheme ?? 'light'].tint}
-                  /> */}
-                  <Text>{route.name}</Text>
-                </View>
-                {/* <IconSymbol
-                size={28}
-                name={MAPPING[route.icon] as SFSymbols6_0 ?? 'map'}
-                color={Colors[colorScheme ?? 'light'].tint}
-              /> */}
-              </Pressable>
-            ))}
-            <Pressable
-              style={{ padding: 10, marginHorizontal: 5 }}
-              android_ripple={{ color: Colors[colorScheme ?? 'light'].tint }}
-              onPress={() => {
-                sheetRef.current?.resize(1);
-                router.push('/camera')
-              }}>
-              <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
-                <MaterialIcons name="camera" size={28} color={Colors[colorScheme ?? 'light'].tint} />
-                <Text> asdfasfasdfsaf</Text>
-              </View>
-            </Pressable>
-            <Pressable
-              style={{ padding: 10, marginHorizontal: 5 }}
-              android_ripple={{ color: Colors[colorScheme ?? 'light'].tint }}
-              onPress={() => {
-                sheetRef.current?.resize(1);
-                router.push('/camera/codeScanner')
-              }}>
-              <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
-                <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].tint} />
-                <Text>Open Barcode Scanner</Text>
-              </View>
-            </Pressable>
+            ref={scrollRef}
+            nestedScrollEnabled
+            contentContainerStyle={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%'
+            }}>
+            <View style={{ justifyContent: 'center' }}>
+              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Scanned Barcodes</Text>
+              {/* {cache.getItem('scannedBarcodes') !== null ? (
+                Object.keys(cache.getItem('scannedBarcodes')).map((barcode) => (
+                  <Text key={barcode} style={{ marginVertical: 5 }}>{barcode}</Text>
+                ))
+              ) : (
+                <Text>No barcodes scanned yet.</Text>
+              )} */}
+            </View>
           </ScrollView>
         </TrueSheet>
       </ParallaxScrollView>

@@ -22,13 +22,44 @@ export const createStorage = (id: string = "fakeKey",
         ...(storageConfig),
     });
     console.log("MMKV storage created", { storageId: id }, JSON.stringify([{ storage }, { storageConfig }]), null, 2);
-    //set a default value for hydratedAt
-    storage.set("hydratedAt", new Date().toISOString());
+    //set a default value for hydratedAt if it doesn't exist or if it is older than 24 hours
+    const hydratedAt = storage.getString("hydratedAt") ?? null;
+    if (hydratedAt === null || (new Date().getTime() - new Date(hydratedAt).getTime()) > 24 * 60 * 60 * 1000) {
+        storage.set("hydratedAt", new Date().toISOString());
+    }
     return storage;
 }
+export interface mmkvCacheInterface {
+    // userId: string | null;
+    storage: MMKV;
+    // encryption: string | null;
+    // storagePrefix: string;
+    // keySepChar: string;
 
-export class GeneralCache {
-    private storage: MMKV;
+    // resourceKeys: {
+    //     [key: string]: string;
+    // };
+    getItem(key: string): string | null;
+    setItem(key: string, value: string): void;
+    removeItem(key: string): void;
+    clear(): void;
+    // getUserResources(resourceTypeKey: Extract<keyof mmkvCache['resourceKeys'], string>[] | null): any[] | null;
+    // setUserResources(resourceData: { [resourceTypeKey in keyof mmkvCache['resourceKeys']]?: any }): void;
+    // deleteUserResources(resourceTypeKey: Extract<keyof mmkvCache['resourceKeys'], string>[] | null): void;
+    // updateStorage(unhashedNewUID: string): Promise<MMKV>;
+    // getKeys(): string[];
+    // resetStorage(): void;
+    // // getCurrentUser(): Partial<userProfile> | null;
+    // flattenObject(obj: any, parent: string, res: any): any;
+    // clearStorage(): void;
+    // getScannedBarcodesByUserId(userId: string): string[] | null;
+    // parseScannedBarcodes(barcodes: string | string[]): string[];
+    // setScannedBarcodesByUserId(barcodes: string[]): void;
+    // getUserStorage(userId: string): Promise<MMKV>;
+    // getUserStoragePath(userId: string): Promise<string | null>;
+}
+export class GeneralCache implements mmkvCacheInterface {
+    storage: MMKV;
     hydratedAt: string | Date | null = null;
     constructor({ storage, config = defaultCacheConfig }: { storage?: MMKV, config?: Partial<Configuration> }) {
         const { id } = config ?? {};
