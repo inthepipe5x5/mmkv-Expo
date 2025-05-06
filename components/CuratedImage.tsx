@@ -13,7 +13,7 @@ export type CuratedImageProps = {
  * @param param0 
  * @returns 
  */
-export default function CuratedImage({ imageTitle, imageSize = "original", imageHeight = 200 }: CuratedImageProps) {
+export default function CuratedImage({ imageTitle, imageSize = "original", imageHeight = 400 }: CuratedImageProps) {
     const [image, setImage] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState<boolean>(false);
     const pc = new Pexels()

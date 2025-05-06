@@ -29,6 +29,14 @@ export default function SignUp() {
     const { cache } = useStorageContext()
     const { signUp } = useAuth();
 
+    const cachedUser = cache.getItem("user") as null | {
+        email?: string;
+        preferences?: {
+            rememberMe?: boolean;
+            [key: string]: any;
+        }
+        [key: string]: any;
+    }
 
     //effect to set "accepted" to true if userAgreement is set in cache
     React.useEffect(() => {
@@ -51,10 +59,10 @@ export default function SignUp() {
     const form = useForm<z.infer<typeof simpleCreateUserSchema>>({
         resolver: zodResolver(simpleCreateUserSchema), //lint ignore
         defaultValues: {
-            email: "",
+            email: cachedUser?.email ?? "",
             password: "",
             confirmPassword: "",
-            rememberMe: false,
+            rememberMe: cachedUser?.preferences?.rememberMe ?? false,
             accepted: !!cache.getItem("userAgreement") ? true : false,
         },
         resetOptions: {

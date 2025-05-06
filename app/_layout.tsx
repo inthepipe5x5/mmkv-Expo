@@ -73,7 +73,12 @@ export default function RootLayout() {
             }}
           >
             <AuthProvider>
-              <Stack>
+              <Stack
+                initialRouteName="(tabs)"
+                screenOptions={{
+                  headerShown: false,
+                }}
+              >
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
