@@ -12,7 +12,10 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
   const theme = useColorScheme() ?? 'light';
 
   return (
-    <ThemedView>
+    <ThemedView
+      lightColor={Colors["light"].background}
+      darkColor={Colors["dark"].background}
+    >
       <TouchableOpacity
         style={styles.heading}
         onPress={() => setIsOpen((value) => !value)}
@@ -21,7 +24,7 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
           name="chevron.right"
           size={18}
           weight="medium"
-          color={theme === 'light' ? Colors.light.icon : Colors.dark.icon}
+          color={theme === 'light' ? Colors.light.primary.main : Colors.dark.primary.main}
           style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}
         />
 

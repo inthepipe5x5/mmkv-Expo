@@ -1,0 +1,54 @@
+{
+  "termsAndConditions": {
+    "title": "Terms and Conditions",
+    "introduction": "Welcome to our Home Inventory Mobile App. By using this application, you agree to the following terms and conditions. Please read them carefully.",
+    "permissions": {
+      "description": "This app requires certain permissions to function properly. Below is a list of the required and optional permissions, along with their purposes.",
+      "required": {
+        "camera": {
+          "description": "The app requires access to your device's camera to scan barcodes and QR codes for inventory management purposes.",
+          "note": "This permission is solely used for the functionality of the app and no images or data are collected or stored."
+        },
+        "email": {
+          "description": "The app may request access to your email to send and manage inventory-related invites.",
+          "note": "Your email data is not collected or used for any other purposes."
+        },
+        "notifications": {
+          "description": "The app requires permission to send notifications to keep you updated on inventory-related events and reminders.",
+          "note": "No personal data is collected or stored for this purpose."
+        },
+        "storage": {
+          "description": "The app requires access to your device's storage to save and manage inventory-related data.",
+          "note": "This permission is used solely for the functionality of the app and no data is collected or stored."
+        },
+        "calendar": {
+          "description": "The app requires access to your calendar to create and manage inventory-related events and reminders.",
+          "note": "This permission is used solely for event creation and no calendar data is collected or stored."
+        }
+      },
+      "optional": {
+        "location": {
+          "description": "The app requires access to your device's location to provide location-based inventory management features as well as personalizing content to your locale.",
+          "note": "This permission is used solely for the functionality of the app and no location data is collected or stored."
+        },
+        "contacts": {
+          "description": "The app requires access to your contact list to share inventory invites with your friends and family.",
+          "note": "This permission is used only for sharing purposes and no contact data is collected or stored."
+        },
+        "socials": {
+          "description": "The app may request access to your social media accounts to share inventory invites.",
+          "note": "No social media data is collected or stored."
+        }
+      }
+    },
+    "dataUsage": {
+      "statement": "We emphasize that no user data is being collected, stored, or used for any means except for what is absolutely necessary for the app's functionality. Your privacy is our top priority."
+    },
+    "contact": {
+      "support": "If you have any questions or concerns about these terms, please contact our support team at support@homeinventoryapp.com."
+    },
+    "userAgreement": {
+      "statement": "By using this app, you agree to grant the necessary permissions for the app to function as intended. If you do not agree to these terms, please refrain from using the app."
+    }
+  }
+}

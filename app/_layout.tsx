@@ -58,30 +58,32 @@ export default function RootLayout() {
   return (
     // <RootContextProvider>
     <StorageContextProvider>
-      {/* <GluestackUIProvider mode={"system" as ModeType}> */}
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={{
-            persister: mmkvGeneralPersister
-          }}
-          onError={() => { //for debugging
-            console.error("Error persisting query client")
-          }}
-          onSuccess={() => { //for debugging
-            console.log("Query client persisted successfully")
-          }}
-        >
-          <AuthProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </AuthProvider>
-        </PersistQueryClientProvider>
-      </ThemeProvider>
-      {/* </GluestackUIProvider> */}
+      <GluestackUIProvider
+      // mode={"system" as ModeType}
+      >
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{
+              persister: mmkvGeneralPersister
+            }}
+            onError={() => { //for debugging
+              console.error("Error persisting query client")
+            }}
+            onSuccess={() => { //for debugging
+              console.log("Query client persisted successfully")
+            }}
+          >
+            <AuthProvider>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              <StatusBar style="auto" />
+            </AuthProvider>
+          </PersistQueryClientProvider>
+        </ThemeProvider>
+      </GluestackUIProvider>
     </StorageContextProvider>
     // </RootContextProvider>
   );
