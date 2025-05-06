@@ -49,9 +49,12 @@ const PromptText = ({ promptText, promptType }: PromptTextProps) => {
         promptContainer: {
             position: 'absolute',
             bottom: height * 0.4, //40% of screen height
-            left: width * 0.25, //half of current width
-            minWidth: viewPort.devices.mobile.width * 0.5, //half of portrate mobile width
+            // left: width * 0.25, //half of current width
+            minWidth: viewPort.devices.mobile.width * 0.2, //half of portrate mobile width
+            maxWidth: viewPort.devices.mobile.width * 0.6, //half of portrate mobile width
             alignItems: 'center',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
         },
         promptText: {
             backgroundColor: bgColor,//'rgba(0,0,0,0.6)',
