@@ -40,8 +40,9 @@ export default function SignUp() {
 
     //effect to set "accepted" to true if userAgreement is set in cache
     React.useEffect(() => {
+        let mounted = true // flag to prevent setting state on unmounted component
         const acceptedListener = cache.storage.addOnValueChangedListener((key: string) => {
-            if (key === "userAgreement") {
+            if (key === "userAgreement" && mounted) {
                 const value = cache.getItem(key)
                 if (value !== null) {
                     form.setValue("accepted", true)
@@ -51,13 +52,15 @@ export default function SignUp() {
             }
         })
         return () => {
+            mounted = false // set flag to false on unmount
+            // cleanup listener to prevent memory leaks
             acceptedListener.remove()
         }
     }, [])
 
 
     const form = useForm<z.infer<typeof simpleCreateUserSchema>>({
-        resolver: zodResolver(simpleCreateUserSchema), //lint ignore
+        resolver: zodResolver(simpleCreateUserSchema) as any, //lint ignore
         defaultValues: {
             email: cachedUser?.email ?? "",
             password: "",
@@ -72,6 +75,7 @@ export default function SignUp() {
         },
         reValidateMode: "onBlur",
     });
+
     const showTermsAndConditions = async () => {
         await TrueSheet.present('TermsAndConditionsSheet')
     }
@@ -104,8 +108,8 @@ export default function SignUp() {
 
     return (
         <SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
-            <View className="flex-1 gap-4 web:m-4">
-                <ThemedText type="title" className="self-start">Sign Up</ThemedText>
+            <View className="flex-1 gap-4 web:m-4 p-5 pt-5">
+                <ThemedText type="title" className="self-start mt-4">Sign Up</ThemedText>
                 <FormControl {...form}>
                     <View className="gap-4">
                         <Controller
@@ -118,7 +122,9 @@ export default function SignUp() {
                                     </FormControlLabel>
                                     <Input>
                                         <InputField
-                                            {...field}
+                                            value={field.value}
+                                            onChangeText={field.onChange}
+                                            onBlur={field.onBlur}
                                             placeholder="Email"
                                             autoCapitalize="none"
                                             autoComplete="email"
@@ -126,6 +132,7 @@ export default function SignUp() {
                                             keyboardType="email-address"
                                             returnKeyType="next"
                                             importantForAutofill="yes"
+                                            autoFocus={true}
                                         />
                                     </Input>
                                     <FormControlError>
@@ -148,24 +155,25 @@ export default function SignUp() {
                                     </FormControlLabel>
                                     <Input>
                                         <InputField
+                                            value={field.value}
+                                            onChangeText={field.onChange}
+                                            onBlur={field.onBlur}
                                             placeholder="Password"
                                             autoCapitalize="none"
                                             autoComplete="off"
                                             autoCorrect={false}
-                                            secureTextEntry
-                                            autoFocus={true}
-                                            type={showPassword ? "text" : "password"}
-                                            {...field}
+                                            secureTextEntry={!showPassword}
+                                        // type={showPassword ? "text" : "password"}
                                         />
                                         <InputSlot
                                             onPress={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-4"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center"
                                             accessibilityLabel="Show password"
                                         >
                                             <InputIcon
                                                 as={showPassword ? EyeIcon : EyeOffIcon}
                                                 size={"md"}
-                                                color="text-gray-500"
+                                                color="black"
                                             />
                                         </InputSlot>
                                     </Input>
@@ -188,23 +196,25 @@ export default function SignUp() {
                                     </FormControlLabel>
                                     <Input>
                                         <InputField
+                                            value={field.value}
+                                            onChangeText={field.onChange}
+                                            onBlur={field.onBlur}
                                             placeholder="Confirm password"
                                             autoCapitalize="none"
                                             autoCorrect={false}
-                                            secureTextEntry
-                                            {...field}
-                                            type={showPassword ? "text" : "password"}
-                                            {...field}
+                                            secureTextEntry={!showPassword}
+                                        // type={showPassword ? "text" : "password"}
                                         />
                                         <InputSlot
                                             onPress={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-4"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center"
+
                                             accessibilityLabel="Show password"
                                         >
                                             <InputIcon
                                                 as={showPassword ? EyeIcon : EyeOffIcon}
                                                 size={"md"}
-                                                color="text-gray-500"
+                                                color="black"
                                             />
                                         </InputSlot>
                                     </Input>
@@ -231,7 +241,9 @@ export default function SignUp() {
                                             placeholder="Accept terms and conditions"
                                             autoCapitalize="none"
                                             autoCorrect={false}
-                                            {...field}
+                                              value={field.value}
+  onChangeText={field.onChange}
+  onBlur={field.onBlur}
                                         />
                                     </Input>
                                     <FormControlError>
@@ -243,30 +255,35 @@ export default function SignUp() {
                                 </>
                             )}
                         /> */}
-                        <Button
+                        {/* <Button
                             size="lg"
                             action="primary"
-                            android_ripple={{ color: light.primary }}
-                            onPress={async () => showTermsAndConditions()}
+                            onPress={async () => await showTermsAndConditions()}
                             ref={termsConditionsButtonRef}
                         >
-                            <ButtonIcon as={Eye} size="md" color="text-gray-500" />
-                            <ButtonText className="text-gray-500">Open Terms and Conditions</ButtonText>
-                        </Button>
+                            <ButtonIcon as={Eye} size="md"
+                            // color="black"
+                            />
+                            <ButtonText className="black">Open Terms and Conditions</ButtonText>
+                        </Button> */}
                     </View>
                 </FormControl>
             </View >
             <Button
                 size="md"
-                action="positive"
-                onPress={form.handleSubmit(onSubmit(form.getValues()))}
-                disabled={form.formState.isSubmitting || isLoading || cache.getItem("userAgreement") === null}
+                android_ripple={{ color: light.primary }}
+                action={cache.getItem("userAgreement") === null ? "primary" : "positive"}
+                onPress={async () => {
+                    cache.getItem("userAgreement") === null ?
+                        await showTermsAndConditions() :
+                        await form.handleSubmit(onSubmit)()
+                }}
+                disabled={isLoading}
                 className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
-
                 {form.formState.isSubmitting ? (
                     <ActivityIndicator size="small" />
                 ) : (
-                    <Text>Sign Up</Text>
+                    <ButtonText>Sign Up</ButtonText>
                 )}
             </Button>
         </SafeAreaView >

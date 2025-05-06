@@ -110,6 +110,7 @@ export const TermsAndConditionsSheet = forwardRef((props: TermsAndConditionsShee
             {/* <Button text="Dismiss" onPress={dismiss} /> */}
 
             <TrueSheet
+                id="TermsAndConditionsSheet"
                 name="TermsAndConditionsSheet"
                 ref={childSheet}
                 sizes={['auto', 'large', '100%']}

@@ -15,7 +15,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import SVGImage from '@/components/SVGImage';
 import { useStorageContext } from '@/components/contexts/StorageProvider';
 import CuratedImage from '@/components/CuratedImage';
-import { viewPort } from '@/constants/dimensions';
+import { CONTENT_GAP, viewPort } from '@/constants/dimensions';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -26,8 +26,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const [barcodes, setBarcodes] = React.useState<string[]>([]);
 
-  const ShowBottomSheet = () => {
-    sheetRef.current?.resize(2);
+  const ShowBottomSheet = async () => {
+    await sheetRef.current?.resize(2);
   }
 
   return (
@@ -56,6 +56,7 @@ export default function HomeScreen() {
           <ThemedText type="title">Welcome!</ThemedText>
           <HelloWave />
         </ThemedView>
+
         <ThemedView style={styles.stepContainer}>
           <ThemedText type="subtitle">Step 1: Try it</ThemedText>
           <CacheTestText />
@@ -90,77 +91,81 @@ export default function HomeScreen() {
               <Text>Open Barcode Scanner</Text>
             </View>
           </Pressable>
-          <ThemedText>
-            Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-            Press{' '}
-            <ThemedText type="defaultSemiBold">
-              {Platform.select({
-                ios: 'cmd + d',
-                android: 'cmd + m',
-                web: 'F12'
-              })}
-            </ThemedText>{' '}
-            to open developer tools.
-          </ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          <ThemedText>
-            Tap the Explore tab to learn more about what's included in this starter app.
-          </ThemedText>
-        </ThemedView>
-        {/* <ThemedView style={styles.stepContainer}>
-
-        </ThemedView> */}
-        {/* <TrueSheet
-          name="landingPageSheet"
-          ref={sheetRef}
-          initialIndex={1}
-          initialIndexAnimated={Platform.OS === 'ios'}
-          sizes={['20%', '50%', '85%']}
-          onMount={() => {
-            const cachedBarcodes = cache.getItem('scannedBarcodes') ?? null;
-            console.log('Sheet mounted, cached barcodes:', cachedBarcodes);
-            switch (true) {
-              case cachedBarcodes === null:
-                console.log('No cached barcodes found');
-                break;
-              default:
-                setBarcodes(cachedBarcodes as unknown as string[]);
-            }
-          }}
-          onPresent={() => {
-            const cachedBarcodes = cache.getItem('scannedBarcodes') ?? null;
-            console.log('Sheet mounted, cached barcodes:', cachedBarcodes);
-            switch (true) {
-              case cachedBarcodes === null:
-                console.log('No cached barcodes found');
-                break;
-              default:
-                setBarcodes(cachedBarcodes as unknown as string[]);
-            }
-          }}
-        >
-          <ScrollView
-            ref={scrollRef}
-            nestedScrollEnabled
-            contentContainerStyle={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: viewPort.devices.mobile.height,
+          <Pressable
+            style={{ padding: 10, marginHorizontal: 5 }}
+            android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
+            onPress={() => {
+              sheetRef.current?.resize(1);
+              router.push('auth')
             }}>
-            <View style={{ justifyContent: 'center' }}>
-              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Scanned Barcodes</Text>
-              {/* {cache.getItem('scannedBarcodes') !== null ? (
-                Object.keys(cache.getItem('scannedBarcodes')).map((barcode) => (
-                  <Text key={barcode} style={{ marginVertical: 5 }}>{barcode}</Text>
-                ))
-              ) : (
-                <Text>No barcodes scanned yet.</Text>
-              )} */}
-        {/* </View>
-          </ScrollView>
-        </TrueSheet> */}
+            <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
+              <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].accent} />
+              <Text>Open "/welcome"</Text>
+            </View>
+          </Pressable>
+
+
+          <TrueSheet
+            name="landingPageSheet"
+            ref={sheetRef}
+            initialIndex={1}
+            initialIndexAnimated={Platform.OS === 'ios'}
+            sizes={['20%', '50%', '85%']}
+            onMount={() => {
+              const cachedBarcodes = cache.getItem('scannedBarcodes') ?? null;
+              console.log('Sheet mounted, cached barcodes:', cachedBarcodes);
+              switch (true) {
+                case cachedBarcodes === null:
+                  console.log('No cached barcodes found');
+                  break;
+                default:
+                  setBarcodes(cachedBarcodes as unknown as string[]);
+              }
+            }}
+            onPresent={() => {
+              const cachedBarcodes = cache.getItem('scannedBarcodes') ?? null;
+              console.log('Sheet mounted, cached barcodes:', cachedBarcodes);
+              switch (true) {
+                case cachedBarcodes === null:
+                  console.log('No cached barcodes found');
+                  break;
+                default:
+                  setBarcodes(cachedBarcodes as unknown as string[]);
+              }
+            }}
+          >
+            <ScrollView
+              ref={scrollRef}
+              nestedScrollEnabled
+              contentContainerStyle={{
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                minHeight: viewPort.devices.mobile.height * 2,
+                paddingVertical: CONTENT_GAP
+              }}>
+              <View style={{ alignContent: 'center' }}>
+                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Routes</Text>
+                {
+                  Object.entries(TabLayoutRouteMapping).map(([key, value]) => (
+                    <Pressable
+                      key={key}
+                      style={{ padding: 10, marginHorizontal: 5 }}
+                      android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
+                      onPress={() => {
+                        sheetRef.current?.resize(1);
+                        router.push(value as unknown as RelativePathString);
+                      }}>
+                      <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
+                        <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].accent} />
+                        <Text>{String(value)}</Text>
+                      </View>
+                    </Pressable>
+                  ))
+                }
+              </View>
+            </ScrollView>
+          </TrueSheet>
+        </ThemedView>
       </ParallaxScrollView>
     </ParentContainer >
 

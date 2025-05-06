@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import { Pexels } from "@/lib/pexels";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
+import { Image as RNImage } from "react-native";
 
 export type CuratedImageProps = {
     imageTitle?: string;
@@ -21,20 +22,20 @@ export default function CuratedImage({ imageTitle, imageSize = "original", image
     React.useEffect(() => {
         const fetchImage = async () => {
             if (image === null) {
-                const image = await pc.getCuratedPhotos(); // Replace with the correct method
-                setImage(image.photos[0]?.src?.[imageSize] as string); // Example of setting the image
+                const results = await pc.getCuratedPhotos(); // Replace with the correct method
+                setImage(results.photos[0]?.src?.[imageSize] as string); // Example of setting the image
             }
+            console.log("image", { image }, "set")
             return
         }
         fetchImage()
-        console.log("image", { image }, "set")
     }, [])
 
     return (
         // <Suspense fallback={<Text>Loading...</Text>}
         // > 
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <Image
+            {image !== null ? <Image
                 source={{ uri: image }}
                 style={{
                     width: "100%",
@@ -42,13 +43,13 @@ export default function CuratedImage({ imageTitle, imageSize = "original", image
                     borderRadius: 8,
                     marginBottom: 8,
                 }}
-                contentFit="cover"
-                placeholder={imageTitle ?? "blurhash"}
+                // contentFit="cover"
+                placeholder={"blurhash"}
                 onLoadStart={() => setLoading(true)}
                 onLoadEnd={() => setLoading(false)}
                 onError={() => console.error("Error loading image", { image })}
                 cachePolicy={"memory-disk"}
-            />
+            /> : null}
             {!!imageTitle ? (<Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>props?.imageTitle </Text>) : null}
         </View>
         // </Suspense>

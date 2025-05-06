@@ -13,6 +13,7 @@ import { passwordLoginSchema } from "@/lib/schemas/auth.schemas";
 import { useStorageContext } from "@/components/contexts/StorageProvider";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { AlertTriangle, EyeIcon, EyeOffIcon } from "lucide-react-native";
+import { light } from "@/constants/Colors";
 // const passwordLoginSchema = z.object({
 //     email: z.string().email("Please enter a valid email address."),
 //     password: z
@@ -38,7 +39,7 @@ export default function SignIn() {
     }
 
     const form = useForm<z.infer<typeof passwordLoginSchema>>({
-        resolver: zodResolver(passwordLoginSchema),
+        resolver: zodResolver(passwordLoginSchema) as any,
         defaultValues: {
             email: cachedUser?.email ?? "",
             password: "",
@@ -64,8 +65,12 @@ export default function SignIn() {
 
     return (
         <SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
-            <View className="flex-1 gap-4 web:m-4">
-                <ThemedText className="self-start ">Sign In</ThemedText>
+            <View className="flex-1 gap-4 web:m-4 p-5 pt-5">
+                <ThemedText
+                    type="title"
+                    className="self-start mt-4">
+                    Sign In
+                </ThemedText>
                 <FormControl {...form}>
                     <View className="gap-4">
                         <Controller
@@ -78,7 +83,9 @@ export default function SignIn() {
                                     </FormControlLabel>
                                     <Input>
                                         <InputField
-                                            {...field}
+                                            value={field.value}
+                                            onChangeText={field.onChange}
+                                            onBlur={field.onBlur}
                                             placeholder="Email"
                                             autoCapitalize="none"
                                             autoComplete="email"
@@ -86,6 +93,7 @@ export default function SignIn() {
                                             keyboardType="email-address"
                                             returnKeyType="next"
                                             importantForAutofill="yes"
+                                            autoFocus={true}
                                         />
                                     </Input>
                                     <FormControlError>
@@ -112,20 +120,22 @@ export default function SignIn() {
                                             autoCapitalize="none"
                                             autoComplete="off"
                                             autoCorrect={false}
-                                            secureTextEntry
+                                            secureTextEntry={!showPassword}
                                             autoFocus={true}
-                                            type={showPassword ? "text" : "password"}
-                                            {...field}
+                                            // type={showPassword ? "text" : "password"}
+                                            value={field.value}
+                                            onChangeText={field.onChange}
+                                            onBlur={field.onBlur}
                                         />
                                         <InputSlot
                                             onPress={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-4"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center"
                                             accessibilityLabel="Show password"
                                         >
                                             <InputIcon
                                                 as={showPassword ? EyeIcon : EyeOffIcon}
                                                 size={"md"}
-                                                color="text-gray-500"
+                                                color={showPassword ? light.accent : "black"}
                                             />
                                         </InputSlot>
                                     </Input>
@@ -143,7 +153,8 @@ export default function SignIn() {
             </View>
             <Button
                 size="md"
-                action="positive"
+                action={form.formState.isValid ? "positive" : "primary"}
+                android_ripple={{ color: light.primary }}
                 onPress={form.handleSubmit(onSubmit)}
                 disabled={form.formState.isSubmitting}
                 className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
@@ -151,7 +162,9 @@ export default function SignIn() {
                 {form.formState.isSubmitting ? (
                     <ActivityIndicator size="small" />
                 ) : (
-                    <Text>Sign In</Text>
+                    <ButtonText
+                        className="text-center text-white font-semibold"
+                    >Sign In</ButtonText>
                 )}
             </Button>
         </SafeAreaView>

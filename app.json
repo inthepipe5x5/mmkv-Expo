@@ -8,6 +8,7 @@
     "scheme": "myapp.homescan",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "jsEngine": "hermes",
       "supportsTablet": true
