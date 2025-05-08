@@ -18,10 +18,14 @@ import { TermsAndConditionsSheet } from "@/screens/auth/TermsAndConditionsSheet"
 import { useStorageContext } from "@/components/contexts/StorageProvider";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { light } from "@/constants/Colors";
+import { findDateDifference, isExpired } from "@/utils/date";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { VStack } from "@/components/ui/vstack";
+import { router } from "expo-router";
 
 // This is a simple sign-up form using React Hook Form and Zod for validation.
 // It includes fields for email, password, and confirm password.
-export default function SignUp() {
+export const SignUpForm = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +48,7 @@ export default function SignUp() {
         const acceptedListener = cache.storage.addOnValueChangedListener((key: string) => {
             if (key === "userAgreement" && mounted) {
                 const value = cache.getItem(key)
-                if (value !== null) {
+                if (value !== null && !isExpired(new Date(value).toDateString(), 1000 * 60 * 60)) {
                     form.setValue("accepted", true)
                 } else {
                     form.setValue("accepted", false)
@@ -91,12 +95,12 @@ export default function SignUp() {
     ) => {
         try {
             setIsLoading(true);
-            if (cache.getItem("userAgreement") === null) {
-                await showTermsAndConditions()
-                return
+            //check if userAgreement is set in cache and if it is less than 1 hour old
+            const agreement = cache.getItem("userAgreement") as string | null;
+            if (!!agreement && findDateDifference(new Date(), new Date(agreement), "hours") < 1) {
+                await signUp(data.email, data.password);
             }
-            await signUp(data.email, data.password);
-
+            await showTermsAndConditions();
             form.reset();
         } catch (error: Error | any) {
             console.error(error.message);
@@ -107,9 +111,12 @@ export default function SignUp() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
+        <>
             <View className="flex-1 gap-4 web:m-4 p-5 pt-5">
-                <ThemedText type="title" className="self-start mt-4">Sign Up</ThemedText>
+                <ThemedText type="title"
+                    className="self-start mt-4  dark:text-white text-black font-bold text-2xl">
+                    Sign Up
+                </ThemedText>
                 <FormControl {...form}>
                     <View className="gap-4">
                         <Controller
@@ -227,65 +234,61 @@ export default function SignUp() {
                                 </>
                             )}
                         />
-                        {/* <Controller
-                            control={form.control}
-                            name="accepted"
-                            render={({ field, fieldState }) => (
-                                <>
-                                    <FormControlLabel>
-                                        <FormControlLabelText>Accept Terms and Conditions</FormControlLabelText>
-                                    </FormControlLabel>
-                                    <Input
-                                        className="flex-row items-center gap-2">
-                                        <InputField
-                                            placeholder="Accept terms and conditions"
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                              value={field.value}
-  onChangeText={field.onChange}
-  onBlur={field.onBlur}
-                                        />
-                                    </Input>
-                                    <FormControlError>
-                                        <FormControlErrorIcon as={AlertTriangle} />
-                                        <FormControlErrorText>
-                                            {fieldState.error?.message ?? null}
-                                        </FormControlErrorText>
-                                    </FormControlError>
-                                </>
-                            )}
-                        /> */}
-                        {/* <Button
-                            size="lg"
-                            action="primary"
-                            onPress={async () => await showTermsAndConditions()}
-                            ref={termsConditionsButtonRef}
-                        >
-                            <ButtonIcon as={Eye} size="md"
-                            // color="black"
-                            />
-                            <ButtonText className="black">Open Terms and Conditions</ButtonText>
-                        </Button> */}
                     </View>
                 </FormControl>
             </View >
-            <Button
-                size="md"
-                android_ripple={{ color: light.primary }}
-                action={cache.getItem("userAgreement") === null ? "primary" : "positive"}
-                onPress={async () => {
-                    cache.getItem("userAgreement") === null ?
-                        await showTermsAndConditions() :
-                        await form.handleSubmit(onSubmit)()
-                }}
-                disabled={isLoading}
-                className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
-                {form.formState.isSubmitting ? (
-                    <ActivityIndicator size="small" />
-                ) : (
-                    <ButtonText>Sign Up</ButtonText>
-                )}
-            </Button>
-        </SafeAreaView >
+            <VStack space={"lg"} className="flex-1 justify-end">
+                <Button
+                    size="md"
+                    action={"secondary"}
+                    android_ripple={{ color: light.primary }}
+                    onPress={() => router.push("/auth/CreateAccount")}
+                    disabled={form.formState.isSubmitting}
+                    className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
+                    <ButtonText>
+                        New user?
+                    </ButtonText>
+                </Button>
+
+                <Button
+                    size="md"
+                    android_ripple={{ color: light.primary }}
+                    action={cache.getItem("userAgreement") === null ? "primary" : "positive"}
+                    onPress={async () => {
+                        switch (true) {
+                            case cache.getItem("userAgreement") === null:
+                                await showTermsAndConditions();
+                                return;
+                            //proceed with form submission if more than 1 hour has passed since last acceptance of terms and conditions
+                            case isExpired(
+                                new Date(cache.getItem("userAgreement") as string).toDateString(), 1000 * 60 * 60):
+                                await form.handleSubmit(onSubmit)();
+                            // remove userAgreement from cache if more than 1 hour has passed since last acceptance of terms and conditions
+                            default:
+                                cache.removeItem("userAgreement");
+                                await showTermsAndConditions();
+                        }
+                    }}
+                    disabled={isLoading || !!!form.formState.errors}
+                    className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
+                    {form.formState.isSubmitting ? (
+                        <ActivityIndicator size="small" />
+                    ) : (
+                        <ButtonText>Sign Up</ButtonText>
+                    )}
+                </Button>
+            </VStack>
+        </>
+    );
+}
+
+export default function CreateUserScreen() {
+    return (
+        <SafeAreaView
+            className="flex-1 bg-background-100 dark:bg-background-900 p-4"
+            edges={["bottom", "top"]}>
+            <SignUpForm />
+            <TermsAndConditionsSheet />
+        </SafeAreaView>
     );
 }

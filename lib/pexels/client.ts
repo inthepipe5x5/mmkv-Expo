@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { PEXELS_API_KEY, PEXELS_API_URL } from "@/lib/pexels/config";
+import { PexelsResponse, PexelsResponseImageObject, PexelsResponseImageSrcKey } from "./types";
 if (!!!PEXELS_API_KEY) {
     throw new Error("PEXELS_API_KEY is not defined. Please set it in your environment variables.");
 }
@@ -242,5 +243,53 @@ They add at least one new photo per hour to our curated list so that you always 
             console.error("Error fetching videos:", error);
             throw error;
         }
+    }
+
+    getSafeCuratedPhotos(
+        data: PexelsResponse,
+        srcKey: PexelsResponseImageSrcKey = "original",
+        asArray: boolean = false,
+    ): string | string[] | null {
+        if (!!!data || !!!data?.photos) return null;
+
+        const { photos } = data;
+        //return the first photo if the srcKey is in the src object and asArray is false
+        if (srcKey in photos?.[0]?.src && !asArray) {
+            return photos?.[0].src[srcKey] ?? null;
+        }
+
+        let output = photos.map((photo: PexelsResponseImageObject, index: number) => {
+            if (!!!photo?.src) {
+                console.warn("Photo does not have a src property:", photo);
+                return null;
+            }
+            const src = photo.src as Record<string, string>;
+            switch (true) {
+                case srcKey in src:
+                    return src[srcKey];
+                case "original" in src:
+                    return src.original;
+                case "large2x" in src:
+                    return src.large2x;
+                case "large" in src:
+                    return src.large;
+                case "medium" in src:
+                    return src.medium;
+                case "small" in src:
+                    return src.small;
+                case "portrait" in src:
+                    return src.portrait;
+                case "landscape" in src:
+                    return src.landscape;
+                case "tiny" in src:
+                    return src.tiny;
+
+                default:
+                    console.warn(`The provided srcKey "${srcKey}" does not exist in the photo's src object.`);
+                    return null;
+            }
+        }) ?? null;
+
+        return output?.filter((item): item is string => item !== null) ?? null;
     }
 }

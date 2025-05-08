@@ -36,7 +36,6 @@ const viewPort = {
     content: { // content area dimensions
         padding: 20,
         margin: 15
-
     },
     button: { // common button dimensions
         width: 150,
@@ -80,7 +79,7 @@ const viewPort = {
 }
 
 export const CONTENT_GAP = viewPort.content.margin
-
+export const HEADER_HEIGHT = viewPort.header.height
 export const SAFE_PADDING_VAL = {
     paddingLeft: StaticSafeAreaInsets.safeAreaInsetsLeft + CONTENT_GAP,
     paddingTop: StaticSafeAreaInsets.safeAreaInsetsTop + CONTENT_GAP,

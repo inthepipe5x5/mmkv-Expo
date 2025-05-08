@@ -11,7 +11,7 @@ import {
     useCodeScanner,
     // useCodeScanner
 } from "react-native-vision-camera"
-import { useStorageContext }  from "@/components/contexts/StorageProvider";
+import { useStorageContext } from "@/components/contexts/StorageProvider";
 import { Redirect } from "expo-router";
 import { Alert, View, Text, TouchableOpacity, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -83,6 +83,7 @@ export default function CodeScannerScreen() {
     const { addNewBarcode, scannedBarcodes } = useCameraContext();
     const resultSheetRef = React.useRef<TrueSheet>(null);
     const scrollRef = React.useRef<ScrollView>(null);
+    const [scanning, setScanning] = React.useState<boolean>(false); //flag to 
     const [openSheet, setOpenSheet] = React.useState<boolean>(false);
     const [messyBarcodes, setMessyBarcodes] = React.useState<{ [key: string]: number }>({});
     const [likelyBarcodes, setLikelyBarcodes] = React.useState<Set<string>>(new Set<string>());
@@ -164,6 +165,7 @@ export default function CodeScannerScreen() {
     }, [prompt])
 
     //#endregion effects
+
     // const ScanOverlay = useSkiaFrameProcessor((frame) => {
     //     'worklet';
     //     frame.render();
@@ -229,9 +231,7 @@ export default function CodeScannerScreen() {
                 format={device.formats[0]}
 
             />
-            {
-                prompt !== null ? <PromptText {...prompt} /> : null
-            }
+
             <TrueSheet
                 name="codeScannerResultSheet"
                 ref={resultSheetRef}
@@ -261,6 +261,9 @@ export default function CodeScannerScreen() {
                         ) : (
                             <Text>No barcodes scanned yet.</Text>
                         )}
+                        {
+                            prompt !== null ? <PromptText {...prompt} /> : null
+                        }
                     </View>
                 </ScrollView>
             </TrueSheet>

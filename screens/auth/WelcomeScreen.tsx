@@ -14,15 +14,15 @@ import { Asset } from "expo-asset";
 export default function WelcomeScreen() {
     const router = useRouter();
     const { colorScheme } = useColorScheme();
-    const welcomeCard =
-        colorScheme !== "dark"
-            ? Asset.fromModule(require("../../assets/images/LightMode_welcomeCard.png"))
-            : Asset.fromModule(require("../../assets/images/DarkMode_welcomeCard.png"));
+    // const welcomeCard =
+    //     colorScheme !== "dark"
+    //         ? Asset.fromModule(require("../../assets/images/LightMode_welcomeCard.png"))
+    //         : Asset.fromModule(require("../../assets/images/DarkMode_welcomeCard.png"));
 
     return (
         <SafeAreaView className="flex flex-1 bg-background p-4">
             <View className="flex flex-1 items-center justify-center gap-y-4 web:m-4">
-                <Image source={welcomeCard} className="flex flex-1 w-full h-full"
+                <Image source={require('@/assets/images/auth/auth-required.png')} className="flex flex-1 w-full h-full"
                 />
                 <ThemedText type="title" className="text-center">Welcome to {appInfo.expo.name}</ThemedText>
                 <Text>

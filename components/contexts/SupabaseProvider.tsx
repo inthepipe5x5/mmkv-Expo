@@ -12,7 +12,7 @@ import { Session } from "@supabase/supabase-js";
 import supabase from "@/lib/supabase/supabase"
 
 SplashScreen.preventAutoHideAsync();
-
+import { useStorageContext } from "@/components/contexts/StorageProvider";
 type AuthState = {
     initialized: boolean;
     session: Session | null;
@@ -35,6 +35,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const [initialized, setInitialized] = useState(false);
     const [session, setSession] = useState<Session | null>(null);
     const router = useRouter();
+    const { cache } = useStorageContext();
 
     const signUp = async (email: string, password: string) => {
         const { data, error } = await supabase.auth.signUp({
@@ -88,6 +89,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
+            // if (!!session) {
+            //     cache.setItem("session", session);
+            // }
         });
 
         supabase.auth.onAuthStateChange((_event, session) => {

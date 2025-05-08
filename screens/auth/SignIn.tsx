@@ -14,6 +14,11 @@ import { useStorageContext } from "@/components/contexts/StorageProvider";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { AlertTriangle, EyeIcon, EyeOffIcon } from "lucide-react-native";
 import { light } from "@/constants/Colors";
+import * as SplashScreen from "expo-splash-screen";
+import { ThemedView } from "@/components/ThemedView";
+import { VStack } from "@/components/ui/vstack";
+import { HelloWave } from "@/components/HelloWave";
+import { useRouter } from "expo-router";
 // const passwordLoginSchema = z.object({
 //     email: z.string().email("Please enter a valid email address."),
 //     password: z
@@ -22,12 +27,13 @@ import { light } from "@/constants/Colors";
 //         .max(64, "Please enter fewer than 64 characters."),
 // });
 
-export default function SignIn() {
+export const SignInForm = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [showPassword, setShowPassword] = useState(false);
     const { cache } = useStorageContext();
     const { signIn } = useAuth();
+    const router = useRouter();
 
     const cachedUser = cache.getItem("user") as null | {
         email?: string;
@@ -64,11 +70,13 @@ export default function SignIn() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
+        // <SafeAreaView className="flex-1 bg-background p-4" edges={["bottom", "top"]}>
+        <>
             <View className="flex-1 gap-4 web:m-4 p-5 pt-5">
                 <ThemedText
                     type="title"
-                    className="self-start mt-4">
+                    className="self-start mt-4 dark:text-white text-black font-bold text-2xl">
+                    <HelloWave />
                     Sign In
                 </ThemedText>
                 <FormControl {...form}>
@@ -151,22 +159,50 @@ export default function SignIn() {
                     </View>
                 </FormControl>
             </View>
-            <Button
-                size="md"
-                action={form.formState.isValid ? "positive" : "primary"}
-                android_ripple={{ color: light.primary }}
-                onPress={form.handleSubmit(onSubmit)}
-                disabled={form.formState.isSubmitting}
-                className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
+            {/* <View className="flex-col items-center justify-between web:m-4 p-5 pt-5"
+            > */}
+            <VStack space={"lg"} className="flex-1 justify-end">
+                <Button
+                    size="md"
+                    action={"secondary"}
+                    android_ripple={{ color: light.primary }}
+                    onPress={() => router.push("/auth/CreateAccount")}
+                    disabled={form.formState.isSubmitting}
+                    className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
+                    <ButtonText>
+                        New user?
+                    </ButtonText>
+                </Button>
+                <Button
+                    size="md"
+                    action={form.formState.isValid ? "positive" : "primary"}
+                    android_ripple={{ color: light.primary }}
+                    onPress={form.handleSubmit(onSubmit)}
+                    disabled={form.formState.isSubmitting}
+                    className="web:m-4 text-white group-hover/button:text-white group-active/button:text-white">
 
-                {form.formState.isSubmitting ? (
-                    <ActivityIndicator size="small" />
-                ) : (
-                    <ButtonText
-                        className="text-center text-white font-semibold"
-                    >Sign In</ButtonText>
-                )}
-            </Button>
+                    {form.formState.isSubmitting ? (
+                        <ActivityIndicator size="small" />
+                    ) : (
+                        <ButtonText
+                            className="text-center text-white font-semibold"
+                        >Sign In</ButtonText>
+                    )}
+                </Button>
+            </VStack>
+            {/* </View> */}
+        </>
+    )
+    // </SafeAreaView >
+
+}
+
+export default function SignIn() {
+    console.log("SignIn screen mounted");
+
+    return (
+        <SafeAreaView className="flex-1 bg-background-100 p-4" edges={["bottom", "top"]}>
+            <SignInForm />
         </SafeAreaView>
-    );
+    )
 }

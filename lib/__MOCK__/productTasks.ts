@@ -1,3 +1,7 @@
+import { Database } from "../supabase/dbTypes";
+type task = Database["public"]["Tables"]["tasks"]["Row"];
+type product = Database["public"]["Tables"]["products"]["Row"];
+type profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export const fakeProduct = {
     id: "1",
@@ -46,7 +50,6 @@ export const fakeProduct = {
     },
     tasks: []
 };
-
 export const fakeTask = {
     id: "1",
     task_name: "Sample Task",
@@ -55,10 +58,10 @@ export const fakeTask = {
     product_id: "1",
     due_date: new Date("2025-03-28").toISOString(),
     completion_status: "overdue",
-    recurrence_interval: "none",
+    recurrence_interval: "4 weeks",
     recurrence_end_date: new Date("2025-12-31").toISOString(),
-    is_automated: false,
-    automation_trigger: "none",
+    is_automated: true,
+    automation_trigger: "unknown",
     created_by: "1",
     created_dt: new Date().toISOString(),
     updated_dt: new Date().toISOString(),
@@ -72,6 +75,7 @@ export const fakeTask = {
         name: "John Doe",
         first_name: "John",
         last_name: "Doe",
+        avatar_photo: "https://example.com/avatar.jpg",
         preferences: {
             theme: "light",
             fontSize: "medium",
@@ -116,7 +120,7 @@ export const fakeTask = {
             authMetaData: {}
         }
     }
-};
+} as task & { assigned_to: profile };
 
 /*
 * @source https://github.com/nastiazhyrnova/VeVeScan/blob/master/src/dummy.js

@@ -12,7 +12,7 @@ import { GluestackUIProvider, ModeType } from "@/components/ui/gluestack-ui-prov
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { mmkvGeneralPersister } from "@/lib/mmkv/persister";
-import { Appearance } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -77,10 +77,20 @@ export default function RootLayout() {
                   headerShown: false,
                 }}
               >
+
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
-              <StatusBar style="auto" />
+              {Platform.OS === "android" ? (
+                <StatusBar
+                  style="light"
+                />
+              ) : (
+                <StatusBar
+                  style="auto"
+                  hideTransitionAnimation={Platform.OS === 'ios' ? "fade" : undefined}
+                />
+              )}
             </AuthProvider>
           </PersistQueryClientProvider>
         </ThemeProvider>

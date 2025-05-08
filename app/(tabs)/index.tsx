@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Image, StyleSheet, Platform, Pressable, useColorScheme, View, Text, Button } from 'react-native';
+import { StyleSheet, Platform, Pressable, useColorScheme, View, Text, Button, TextInput } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -16,27 +16,55 @@ import SVGImage from '@/components/SVGImage';
 import { useStorageContext } from '@/components/contexts/StorageProvider';
 import CuratedImage from '@/components/CuratedImage';
 import { CONTENT_GAP, viewPort } from '@/constants/dimensions';
+import AuthSheet from '@/components/CustomSheets/AuthSheets';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
+import { LucideScanBarcode, Menu } from 'lucide-react-native';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const ParentContainer = Platform.OS === 'web' ? View : GestureHandlerRootView
   const sheetRef = useRef<TrueSheet>(null);
+  const authSheetRef = useRef<TrueSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
   const { cache } = useStorageContext();
   const router = useRouter();
   const [barcodes, setBarcodes] = React.useState<string[]>([]);
-
-  const ShowBottomSheet = async () => {
-    await sheetRef.current?.resize(2);
+  const [testInputVal, setTestInputVal] = React.useState<string>('');
+  const ShowBottomSheet = () => {
+    sheetRef.current?.resize(2);
   }
 
   return (
-    <ParentContainer style={{ flex: 1 }}>
+    <ParentContainer style={styles.parentContainer}>
       <ParallaxScrollView
-        headerBackgroundColor={{ light: light.background, dark: dark.background }}//{ light: '#A1CEDC', dark: '#1D3D47' }}
+        headerBackgroundColor={{
+          light: light.background,
+          dark: dark.background
+        }}//{ light: '#A1CEDC', dark: '#1D3D47' }}
         headerImage={
-          <CuratedImage
-          />
+          <>
+            <Fab
+              className="bg-success-400"
+              size="sm"
+              placement="bottom left"
+              onPress={() => ShowBottomSheet()}
+              focusable={true}
+              accessibilityLabel="Open Bottom Sheet"
+              isFocusVisible={true}
+            >
+              <FabIcon
+                as={Menu}
+                size="lg"
+                color={Colors[colorScheme ?? 'light'].background}
+              />
+              <FabLabel>
+                Routes
+              </FabLabel>
+            </Fab>
+            <CuratedImage
+            />
+          </>
           // <Image
           //   source={require('@/assets/images/partial-react-logo.png')}
           //   style={styles.reactLogo}
@@ -52,22 +80,44 @@ export default function HomeScreen() {
             headerShown: true,
           }}
         />
+
+        <Fab
+          size="lg"
+          placement="bottom left"
+          android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
+          onPress={async () => {
+            // await TrueSheet.dismiss("landingPageSheet");
+            // await TrueSheet.dismiss("SIGN_IN_SHEET");
+
+            router.push('/camera/codeScanner')
+          }}
+        >
+          <FabIcon
+            as={LucideScanBarcode}
+            size="lg"
+            color={Colors[colorScheme ?? 'light'].background}
+          />
+          <FabLabel>
+            Open Bar Code Scanner
+          </FabLabel>
+        </Fab>
         <ThemedView style={styles.titleContainer}>
           <ThemedText type="title">Welcome!</ThemedText>
           <HelloWave />
         </ThemedView>
-
         <ThemedView style={styles.stepContainer}>
           <ThemedText type="subtitle">Step 1: Try it</ThemedText>
           <CacheTestText />
           <View style={{ marginBottom: 8 }}>
             <Button
               title="Open Bottom Sheet"
-              onPress={ShowBottomSheet}
+              onPress={async () => await ShowBottomSheet()}
               color={Colors[colorScheme ?? 'light'].accent}
               accessibilityLabel="Open Bottom Sheet"
             />
           </View>
+
+
           <View style={{ marginBottom: 8 }}>
             <Button
               title="Open Camera"
@@ -86,7 +136,11 @@ export default function HomeScreen() {
               sheetRef.current?.resize(1);
               router.push('/camera/codeScanner')
             }}>
-            <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
+            <View style={{
+              flexDirection: "row",
+              minWidth: 200, height: 28,
+              borderRadius: 14
+            }} >
               <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].accent} />
               <Text>Open Barcode Scanner</Text>
             </View>
@@ -96,11 +150,25 @@ export default function HomeScreen() {
             android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
             onPress={() => {
               sheetRef.current?.resize(1);
-              router.push('auth')
+              router.push('/auth/SignIn')
             }}>
             <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
               <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].accent} />
               <Text>Open "/welcome"</Text>
+            </View>
+          </Pressable>
+          <Pressable
+            style={{ padding: 10, marginHorizontal: 5 }}
+            android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
+            onPress={() => {
+              console.log('auth sheet pressed');
+              sheetRef.current?.dismiss();
+              TrueSheet.present("SIGN_IN_SHEET", 1);
+              // router.push('/auth/SignIn')
+            }}>
+            <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
+              <MaterialIcons name="lock" size={28} color={Colors[colorScheme ?? 'light'].accent} />
+              <Text>OPEN AUTH SHEET</Text>
             </View>
           </Pressable>
 
@@ -108,9 +176,10 @@ export default function HomeScreen() {
           <TrueSheet
             name="landingPageSheet"
             ref={sheetRef}
-            initialIndex={1}
+            initialIndex={0}
             initialIndexAnimated={Platform.OS === 'ios'}
-            sizes={['20%', '50%', '85%']}
+            sizes={['auto', '50%', '85%']}
+            dimmedIndex={2}
             onMount={() => {
               const cachedBarcodes = cache.getItem('scannedBarcodes') ?? null;
               console.log('Sheet mounted, cached barcodes:', cachedBarcodes);
@@ -133,6 +202,7 @@ export default function HomeScreen() {
                   setBarcodes(cachedBarcodes as unknown as string[]);
               }
             }}
+
           >
             <ScrollView
               ref={scrollRef}
@@ -142,22 +212,73 @@ export default function HomeScreen() {
                 alignItems: 'center',
                 minHeight: viewPort.devices.mobile.height * 2,
                 paddingVertical: CONTENT_GAP
+              }}
+              stickyHeaderIndices={[0]}
+            >
+              <View
+                style={{
+                  // margin: 10,
+                  padding: 10,
+                  width: '100%',
+                }}
+              >
+                <TextInput
+                  value={testInputVal}
+                  placeholder="Type here..."
+                  onChangeText={(text: string) => setTestInputVal(text)}
+                  style={{
+                    backgroundColor: Colors[colorScheme ?? 'light'].background,
+                    borderColor: Colors[colorScheme ?? 'light'].accent,
+                    padding: 10,
+                    borderRadius: 8
+                  }}
+                />
+              </View>
+
+              <View style={{
+                alignContent: 'center',
+                width: '100%'
               }}>
-              <View style={{ alignContent: 'center' }}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Routes</Text>
+
+                <Text style={{
+                  marginHorizontal: 10,
+                  fontSize: 20,
+                  fontWeight: 'bold'
+                }}>
+                  Routes</Text>
+
                 {
                   Object.entries(TabLayoutRouteMapping).map(([key, value]) => (
                     <Pressable
                       key={key}
                       style={{ padding: 10, marginHorizontal: 5 }}
                       android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
-                      onPress={() => {
-                        sheetRef.current?.resize(1);
-                        router.push(value as unknown as RelativePathString);
-                      }}>
-                      <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
-                        <MaterialIcons name="qr-code" size={28} color={Colors[colorScheme ?? 'light'].accent} />
-                        <Text>{String(value)}</Text>
+
+                      onPress={
+                        () => {
+                          console.log('Route pressed', JSON.stringify({ key, value }, null, 4));
+                          // sheetRef.current?.dismiss();
+                          // TrueSheet.dismiss("SIGN_IN_SHEET");
+                          router.push(value.name as unknown as RelativePathString);
+                        }}
+                    >
+                      <View style={{
+                        flexDirection: "row",
+                        minWidth: 200,
+                        height: 28,
+                        borderRadius: 14,
+                        justifyContent: "flex-start"
+                      }} >
+                        <IconSymbol name={value.icon} size={28} color={Colors[colorScheme ?? 'light'].accent} />
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 'bold',
+                            color: Colors[colorScheme ?? 'light'].text,
+                            marginRight: "auto",
+                            marginLeft: 50
+                          }}
+                        >{String(value?.options?.title ?? "Route")}</Text>
                       </View>
                     </Pressable>
                   ))
@@ -165,14 +286,20 @@ export default function HomeScreen() {
               </View>
             </ScrollView>
           </TrueSheet>
+          <AuthSheet ref={authSheetRef}
+          />
         </ThemedView>
       </ParallaxScrollView>
     </ParentContainer >
-
   );
 }
 
 const styles = StyleSheet.create({
+  parentContainer: {
+    flexGrow: 1,
+    // paddingTop: CONTENT_GAP * 2,
+    gap: CONTENT_GAP,
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',

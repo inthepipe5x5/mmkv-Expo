@@ -39,7 +39,7 @@ export const TabLayoutRouteMapping = [{
   options: {
     title: 'Create Task',
   },
-  icon: "square.plus",
+  icon: "message.fill",
 },
 ] as TabLayoutRoute[];
 
@@ -49,7 +49,7 @@ export default function TabLayout() {
     <Stack
       screenOptions={{
         // tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // headerShown: false,
+        headerShown: false,
         // tabBarButton: HapticTab,
         // tabBarBackground: TabBarBackground,
         // tabBarStyle: Platform.select({

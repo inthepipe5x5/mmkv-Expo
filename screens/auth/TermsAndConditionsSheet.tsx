@@ -43,21 +43,20 @@ export const TermsAndConditionsSheet = forwardRef((props: TermsAndConditionsShee
     const presentChild = async () => {
         // Note: no need to dismiss this sheet 😎
         await childSheet.current?.present()
-
         console.log('Child sheet presented!')
     }
 
-    const presentPromptSheet = async () => {
+    const presentConfirmSheet = async () => {
         // Note: we need to dismiss this sheet first
         await sheetRef.current?.dismiss()
-
-        await TrueSheet.present('prompt-sheet')
+        await TrueSheet.present('confirmTermsAndConditionsSheet', 1)
     }
 
     useImperativeHandle<TrueSheet | null, TrueSheet | null>(ref, () => sheetRef.current)
 
     return (
         <TrueSheet
+            name="TermsAndConditionsSheet"
             sizes={['small', '100%']}
             ref={sheetRef}
             contentContainerStyle={$content}
@@ -97,7 +96,7 @@ export const TermsAndConditionsSheet = forwardRef((props: TermsAndConditionsShee
                     android_ripple={{ color: accent }}
                     action="positive"
                     onHoverIn={() => resize(0)}
-                    onPress={async () => presentChild()}>
+                    onPress={async () => await presentChild()}>
                     <ButtonText>Continue</ButtonText>
                 </Button>
             }
@@ -110,10 +109,10 @@ export const TermsAndConditionsSheet = forwardRef((props: TermsAndConditionsShee
             {/* <Button text="Dismiss" onPress={dismiss} /> */}
 
             <TrueSheet
-                id="TermsAndConditionsSheet"
-                name="TermsAndConditionsSheet"
+                // id="TermsAndConditionsSheet"
+                name="confirmTermsAndConditionsSheet"
                 ref={childSheet}
-                sizes={['auto', 'large', '100%']}
+                sizes={[`${0}%`, 'large', '100%']}
                 backgroundColor={background}
                 contentContainerStyle={$content}
                 edgeToEdge
