@@ -4,6 +4,7 @@ import supabase from "@/lib/supabase/supabase";
 import { Database } from '@/lib/supabase/dbTypes';
 import { useMemo } from "react";
 import ProductCard from "@/components/products/ProductCard";
+
 export type ProductMasonryListProps = {
     data: Database["public"]["Tables"]["products"]["Row"][];
     onPress: (item: Database["public"]["Tables"]["products"]["Row"]) => void;

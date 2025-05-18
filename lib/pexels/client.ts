@@ -39,7 +39,7 @@ export type PexelsClientType = {
         next_page: string | null;
         prev_page?: string | null;
     }>) => void
-    getPhotos: (query: string, page?: number, per_page?: number) => Promise<any>;
+    searchPhotos: (query?: string, color?: string, page?: number, per_page?: number) => Promise<any>;
     nextPage: () => Promise<any>;
     prevPage: () => Promise<any>;
     getPhoto: (id: string) => Promise<any>;
@@ -73,28 +73,65 @@ export default class PexelsClient implements PexelsClientType {
         endpoint?: string;
         page: number;
         per_page: number;
-        query: string;
+        query?: string;
         params: Record<string, any>;
         total_results?: number | null | undefined;
         next_page: string | null;
         prev_page?: string | null;
     }>) => {
-        this.currentQuery = {
+        //check if new query
+        const existingQuery = [
+            !!this.currentQuery.query,
+            !!this.currentQuery.page,
+            this.currentQuery.endpoint === updatedQuery.endpoint,
+            updatedQuery.query === this.currentQuery.query,
+            updatedQuery.page === this.currentQuery.page + 1,
+        ].every(Boolean)
+        // Merge the current query with the updated query
+        this.currentQuery = existingQuery ? {
             ...this.currentQuery,
             ...updatedQuery,
-        };
+        } : updatedQuery as any;
         console.log("Updated current query:", JSON.stringify(this.currentQuery, null, 4));
     };
-
-    async getPhotos(query: string, page: number = 1, per_page: number = 15) {
+    /** Fetches photos from Pexels API based on a search query.
+     * 
+     * @param query - The search query string.
+     * @param page - The page number to fetch (default is 1).
+     * @param per_page - The number of photos per page (default is 15).
+     * @returns {Promise<PexelsResponse>} The response data containing the photos.
+     */
+    async searchPhotos(query: string = "avatar", color?: string, page: number = 1, per_page: number = 15) {
         try {
             const { query: currentQuery, page: currentPage, per_page: currentPerPage } = this.currentQuery;
+            let params = {
+                page: currentPage,
+                per_page: currentPerPage,
+            } as Record<string, any>;
+
+            switch (true) {
+                case !!color:
+                    params = {
+                        ...params,
+                        color: color,
+                    };
+                // break; // No break here to allow for query to be added as well
+                case !!query:
+                    params = {
+                        ...params,
+                        query: query,
+                    };
+                    break;
+                case !!currentQuery:
+                    params = {
+                        ...params,
+                        query: currentQuery,
+                    };
+                    break;
+            }
+
             const response = await this.client.get("search", {
-                params: {
-                    query: currentQuery,
-                    page: currentPage,
-                    per_page: currentPerPage,
-                },
+                params
             });
             this.updateCurrentQuery({
                 endpoint: "search", query, page: page + 1,

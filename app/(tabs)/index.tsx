@@ -20,28 +20,102 @@ import AuthSheet from '@/components/CustomSheets/AuthSheets';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Fab, FabLabel, FabIcon } from '@/components/ui/fab';
 import { LucideScanBarcode, Menu } from 'lucide-react-native';
+// import { TermsAndConditionsSheet } from '@/screens/auth/TermsAndConditionsSheet';
+import { useQuery } from '@tanstack/react-query';
+import { getHouseholdAndInventoryTemplates } from '@/lib/supabase/register';
+import supabase from '@/lib/supabase/supabase';
+import { Toast, ToastDescription, ToastTitle, useToast } from '@/components/ui/toast';
+import { Spinner } from '@/components/ui/spinner';
 
+//#region default component
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const ParentContainer = Platform.OS === 'web' ? View : GestureHandlerRootView
   const sheetRef = useRef<TrueSheet>(null);
   const authSheetRef = useRef<TrueSheet>(null);
+  const termsConditionsSheetRef = useRef<TrueSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
   const { cache } = useStorageContext();
   const router = useRouter();
   const [barcodes, setBarcodes] = React.useState<string[]>([]);
   const [testInputVal, setTestInputVal] = React.useState<string>('');
+  const toast = useToast();
+
   const ShowBottomSheet = () => {
     sheetRef.current?.resize(2);
   }
+  //#region useQuery
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["householdInventoryTemplates"],
+    queryFn: async () => {
+      const data = await getHouseholdAndInventoryTemplates();
+      return data;
+    }
+  })
+  //#endregion useQuery
+
+
+  if (isLoading) {
+    return (
+      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ThemedText type="title">Loading...</ThemedText>
+        <Spinner
+          size="large"
+          color={Colors[colorScheme ?? 'light'].accent}
+        />
+      </ThemedView>
+    )
+  }
+  if (error) {
+    console.error('Error fetching templates:', error);
+    toast.show({
+      duration: 3000,
+      placement: "bottom",
+      render: () => {
+        return (
+          <Toast
+            action="error"
+            variant="outline"
+            className="text-info-500 p-2 m-5"
+          >
+            <ToastTitle>
+              Error fetching templates
+            </ToastTitle>
+            <ToastDescription>
+              {JSON.stringify(error.message, null, 4)}
+            </ToastDescription>
+          </Toast>
+        )
+      }
+    })
+  }
+
+  //#region toast
+  // toast.show({
+  //   duration: 3000,
+  //   placement: "bottom",
+  //   render: () => {
+  //     return (
+  //       <Toast
+  //         action="success"
+  //         variant="solid"
+  //         className="text-typography-white p-2 m-5"
+  //       >
+  //         <ToastTitle>
+  //           Initialized!
+  //         </ToastTitle>
+  //         <ToastDescription>
+  //           App initialized successfully!
+  //         </ToastDescription>
+  //       </Toast>
+  //     )
+  //   }
+  // })
+  //#endregion toast
 
   return (
     <ParentContainer style={styles.parentContainer}>
       <ParallaxScrollView
-        headerBackgroundColor={{
-          light: light.background,
-          dark: dark.background
-        }}//{ light: '#A1CEDC', dark: '#1D3D47' }}
         headerImage={
           <>
             <Fab
@@ -74,12 +148,12 @@ export default function HomeScreen() {
           //   uri={Pexels.get}
           // />
         }>
-        <Stack
+        {/* <Stack
           screenOptions={{
             title: 'Home',
             headerShown: true,
           }}
-        />
+        /> */}
 
         <Fab
           size="lg"
@@ -171,8 +245,26 @@ export default function HomeScreen() {
               <Text>OPEN AUTH SHEET</Text>
             </View>
           </Pressable>
-
-
+          <Pressable
+            style={{ padding: 10, marginHorizontal: 5 }}
+            android_ripple={{ color: Colors[colorScheme ?? 'light'].accent }}
+            onPress={() => {
+              console.log('terms and conditions sheet pressed');
+              sheetRef.current?.dismiss();
+              // TrueSheet.present("termsAndConditionsSheet", 1);
+              // termsConditionsSheetRef.current?.resize(1);
+              // router.push('/auth/SignIn')
+            }}>
+            <View style={{ flexDirection: "row", minWidth: 200, height: 28, borderRadius: 14 }} >
+              <MaterialIcons name="lock" size={28} color={Colors[colorScheme ?? 'light'].accent} />
+              <Text>OPEN TERMS SHEET</Text>
+            </View>
+          </Pressable>
+          <ThemedText type="title">Templates</ThemedText>
+          <ThemedText type="subtitle">Household and Inventory</ThemedText>
+          <ThemedText>
+            {JSON.stringify(data, null, 4)}
+          </ThemedText>
           <TrueSheet
             name="landingPageSheet"
             ref={sheetRef}
@@ -293,7 +385,7 @@ export default function HomeScreen() {
     </ParentContainer >
   );
 }
-
+//#endregion default component
 const styles = StyleSheet.create({
   parentContainer: {
     flexGrow: 1,

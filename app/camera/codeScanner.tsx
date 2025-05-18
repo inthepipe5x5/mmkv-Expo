@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from "react";
-import { Platform, ScrollView } from "react-native";
+import React, { useCallback, useEffect, useRef } from "react";
+import { Platform, ScrollView, useWindowDimensions } from "react-native";
 import {
     Camera,
     CameraDevice, useCameraDevice,
@@ -25,6 +25,12 @@ import normalizeBarcode, { CalculateWithinOverlay } from "@/utils/barcode";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { Barcode } from "react-native-vision-camera-barcodes-scanner/lib/typescript/src/types";
 import PromptText, { PromptTextProps } from "@/components/PromptText";
+import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
+import { useQuery } from "@tanstack/react-query";
+import supabase from "@/lib/supabase/supabase";
+import axios, { AxiosInstance } from "axios";
+import { OFFProduct } from "@/lib/__MOCK__/productTasks";
+import { set } from "react-hook-form";
 
 export const defaultCodeTypes = (defaultOverride?: CodeType[]) => {
     if (defaultOverride) return defaultOverride as CodeType[];
@@ -79,15 +85,19 @@ const DEBOUNCE_TIME = 3000 //3 seconds to handle the "constant" messy barcodes b
 
 export default function CodeScannerScreen() {
     const device = useCameraDevice('back') as CameraDevice | undefined;
+    const { height, width } = useWindowDimensions();
     // const { cache } = useStorageContext();
     const { addNewBarcode, scannedBarcodes } = useCameraContext();
     const resultSheetRef = React.useRef<TrueSheet>(null);
     const scrollRef = React.useRef<ScrollView>(null);
+    const [cameraInitialized, setCameraInitialized] = React.useState<boolean>(false);
     const [scanning, setScanning] = React.useState<boolean>(false); //flag to 
     const [openSheet, setOpenSheet] = React.useState<boolean>(false);
     const [messyBarcodes, setMessyBarcodes] = React.useState<{ [key: string]: number }>({});
     const [likelyBarcodes, setLikelyBarcodes] = React.useState<Set<string>>(new Set<string>());
+    const [invalidBarcodes, setInvalidBarcodes] = React.useState<Set<string>>(new Set<string>());
     const [prompt, setPrompt] = React.useState<PromptTextProps | null>(null);
+    const toast = useToast();
     //#region effects
     useEffect(() => {
         const handleOpenSheet = async () => {
@@ -115,6 +125,9 @@ export default function CodeScannerScreen() {
     }, [])
     //find the most frequent barcode in the messyBarcodes object and set it to likelyBarcodes
     useEffect(() => {
+        //if the camera is not initialized, do nothing
+        if (!!!cameraInitialized) return;
+
         if (Object.keys(messyBarcodes).length === 0) {
             setPrompt({
                 promptText: "No barcodes scanned detected yet. Try again.",
@@ -128,16 +141,32 @@ export default function CodeScannerScreen() {
                 promptText: "Scanning...",
                 promptType: "info"
             });
+            //handle the messy barcodes being actively scanned
             const debouncedScan = setTimeout(() => {
-                const mostFrequentBarcode = Object.keys(messyBarcodes).reduce((a, b) => messyBarcodes[a] > messyBarcodes[b] ? a : b);
-                const barcodeCount = messyBarcodes[mostFrequentBarcode];
-                console.log("mostFrequentBarcode", { mostFrequentBarcode, barcodeCount });
-                //update state and cache the result 
-                likelyBarcodes.add(mostFrequentBarcode);
-                setLikelyBarcodes(likelyBarcodes);
-                addNewBarcode(mostFrequentBarcode);
+                const mostFrequentBarcode = Object.keys(messyBarcodes)
+                    //ensure the barcode is not in the invalid barcodes set
+                    .filter((barcode: string) => !invalidBarcodes.has(barcode))
+                    //sort the barcodes by their frequency
+                    .reduce((a, b) => messyBarcodes[a] > messyBarcodes[b] ? a : b);
 
-                //clear the messy barcodes
+                const barcodeCount = messyBarcodes[mostFrequentBarcode] as number;
+
+                if (!!!barcodeCount || barcodeCount < 5) {
+                    setPrompt({
+                        promptText: `Try moving closer to the barcode.`,
+                        promptType: "info"
+                    })
+                    return;
+                }
+
+                if (barcodeCount >= 5) { // Ensure the barcode is scanned at least 5 times
+                    console.log("mostFrequentBarcode", { mostFrequentBarcode, barcodeCount });
+                    // Update state and cache the result
+                    likelyBarcodes.add(mostFrequentBarcode);
+                    setLikelyBarcodes(likelyBarcodes);
+                    addNewBarcode(mostFrequentBarcode);
+                }
+                // Clear the messy barcodes
                 setMessyBarcodes({});
                 setPrompt({
                     promptText: `Scanned new barcode: ${mostFrequentBarcode} (${barcodeCount} times)`,
@@ -157,15 +186,77 @@ export default function CodeScannerScreen() {
     //clean up prompts
     useEffect(() => {
         if (prompt === null) return;
-        const timeout = setTimeout(() => {
-            setPrompt(null);
-        }, DEBOUNCE_TIME);
-        return () => clearTimeout(timeout);
+        // const timeout = setTimeout(() => {
+        //     setPrompt(null);
+        // }, DEBOUNCE_TIME);
+        // return () => clearTimeout(timeout);
+        toast.show({
+            duration: 2000,
+            placement: "top",
+            render: () => {
+                return (<Toast
+                    variant="solid"
+                    action={prompt.promptType}
+                >
+                    <ToastTitle>{prompt.promptText}</ToastTitle>
+                </Toast>)
+            }
+        })
 
     }, [prompt])
 
-    //#endregion effects
 
+
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['barcodeLookup', { barcodes: Array.from(likelyBarcodes) }],
+        queryFn: async () => {
+            // offAxios.current = axios.create({
+            //     baseURL: `${process.ENV.EXPO_PUBLIC_OPEN_FOOD_FACTS_API}${process.ENV.EXPO_PUBLIC_OPEN_FOOD_FACTS_API_VERSION}`
+            //     headers: {
+
+            //     }
+            // })
+            if (likelyBarcodes.size === 0) return;
+            const results = await Promise.all([
+                supabase.from("products")
+                    .select()
+                    .in("barcode", Array.from(likelyBarcodes)),
+                setTimeout(() => {
+                    return OFFProduct
+                }, 1000)
+            ]);
+            console.log("results", JSON.stringify(results, null, 4));
+            //handle supabase error
+            if (results[0].error) {
+                setPrompt({
+                    promptText: "No matching product found in the database",
+                    promptType: "error"
+                });
+                return;
+            }
+            //handle empty result
+            if (!results.every(Boolean) || results[0].data.length === 0) {
+                setPrompt({
+                    promptText: "No matching product found in the database",
+                    promptType: "error"
+                });
+                //update invalid barcodes
+                Array.from(likelyBarcodes).forEach(barcode => invalidBarcodes.add(barcode));
+                setInvalidBarcodes(invalidBarcodes);
+            }
+            //reset barcodes
+            setLikelyBarcodes(new Set<string>());
+            setMessyBarcodes({});
+            return;
+        },
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchInterval: false,
+        enabled: (likelyBarcodes.size > 0) === true
+    })
+
+    //#endregion effects
+    //#region skia frame 
     // const ScanOverlay = useSkiaFrameProcessor((frame) => {
     //     'worklet';
     //     frame.render();
@@ -189,6 +280,7 @@ export default function CodeScannerScreen() {
     //     clearPaint.setBlendMode(BlendMode.Clear);
     //     frame.drawRect(Skia.XYWHRect(rectX, rectY, rectWidth, rectHeight), clearPaint);
     // }, []);
+    // 
     // const parseFrame = useCallback((frame: Frame) => {
 
     //     const codes = scanBarcodes(frame) as Barcode[];
@@ -196,6 +288,7 @@ export default function CodeScannerScreen() {
     //     //do nothing if the code is already scanned
 
     // }, [])
+    //#endregion skia frame 
 
     if (!!!device) {
         return <Redirect href="/camera/no-devices" />;
@@ -207,7 +300,11 @@ export default function CodeScannerScreen() {
             if (codes.length === 0) return;
             codes.forEach((code) => {
                 //handle a unique barcode with a truthy value
-                if (typeof code.value === 'string' && !(likelyBarcodes.has(code.value))) handleScannedMessyBarcodes(code);
+                if (typeof code.value === 'string'
+                    && !(likelyBarcodes.has(code.value))
+                    && !invalidBarcodes.has(code.value)) {
+                    handleScannedMessyBarcodes(code)
+                };
             })
         }
     })
@@ -222,16 +319,29 @@ export default function CodeScannerScreen() {
         <SafeAreaView style={{ flex: 1 }}>
             <Camera
                 device={device}
-                isActive={useIsFocused()}
+                isActive={useIsFocused() && !isLoading}
                 // frameProcessor={ScanOverlay}
-                style={{ flex: 1 }}
+                style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                }}
+                onInitialized={() => setCameraInitialized(true)}
                 codeScanner={codeScanner}
-                // frameProcessor={barcodeFrameProcessor}
                 photoQualityBalance="speed"
                 format={device.formats[0]}
-
             />
-
+            <View
+                style={{
+                    backgroundColor: 'rgba(0, 0, 0, 0)',
+                    borderColor: "white",
+                    borderWidth: 10,
+                    width: '100%',
+                    height: Platform.OS === 'android' ? Math.floor(height * 0.3) : 200,
+                    position: 'absolute',
+                    top: height * 0.5 - (Platform.OS === 'android' ? Math.floor(height * 0.3) : 200) / 2,
+                    left: width * 0.5 - width * 0.8 / 2,
+                }}
+            />
             <TrueSheet
                 name="codeScannerResultSheet"
                 ref={resultSheetRef}

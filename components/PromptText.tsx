@@ -4,10 +4,10 @@ import Colors from '@/constants/Colors';
 import { viewPort } from '@/constants/dimensions';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-export type promptType = "error" | "warning" | "success" | "info"
+export type promptType = "error" | "warning" | "success" | "info" | "muted"
 export type PromptTextProps = {
     promptText: string;
-    promptType: string;
+    promptType: promptType;
 }
 
 export const getBadgeColorByType = (badgeType: promptType): string => {

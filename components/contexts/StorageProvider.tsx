@@ -1,5 +1,12 @@
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useState
+} from 'react';
+import { Appearance } from 'react-native';
 import { GeneralCache } from '@/lib/mmkv/index';
 //#region create context
 export const StorageContext = createContext<{
@@ -12,12 +19,14 @@ export const StorageContext = createContext<{
 export const StorageContextProvider = ({ children }: { children: React.ReactNode }) => {
     const cache = useMemo(() => new GeneralCache({}), []);
     const [initialized, setInitialized] = useState(false);
+    // const [cachedTheme, setCachedTheme] = useState<"light" | "dark">("light");
 
     useEffect(() => {
         //set initialized to true
         setInitialized(true);
         cache.setItem('cacheInitialized', new Date().toUTCString());
         console.log('StorageContextProvider initialized:', { initialized });
+
     }, []);
 
     const value = useMemo(() => ({

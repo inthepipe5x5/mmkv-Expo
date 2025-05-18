@@ -7,13 +7,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { ThemedText } from "@/components/ThemedText";
-import { useColorScheme } from "nativewind"
 import * as appInfo from "@/app.json";
-import { ImageBackground } from "expo-image";
-import { Asset } from "expo-asset";
 export default function WelcomeScreen() {
     const router = useRouter();
-    const { colorScheme } = useColorScheme();
     // const welcomeCard =
     //     colorScheme !== "dark"
     //         ? Asset.fromModule(require("../../assets/images/LightMode_welcomeCard.png"))

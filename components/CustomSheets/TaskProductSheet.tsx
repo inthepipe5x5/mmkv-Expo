@@ -46,7 +46,17 @@ const TaskProductSheet = forwardRef((props: TrueSheetProps, ref: React.Ref<TrueS
                 .limit(10)
                 .abortSignal(queryAborter.current?.signal ?? new AbortController().signal);
             if (error) throw error;
-            return data[0] as Database["public"]["Tables"]["tasks"]["Row"];
+            const currentTask = data[0] as Database["public"]["Tables"]["tasks"]["Row"];
+
+            const associatedProduct = await supabase
+                .from("products")
+                .select()
+                .eq("id", currentTask.product_id)
+                .limit(1)
+                .abortSignal(queryAborter.current?.signal ?? new AbortController().signal);
+            if (associatedProduct.error) throw associatedProduct.error;
+            const product = associatedProduct.data[0] as Database["public"]["Tables"]["products"]["Row"];
+            return { task: currentTask, product };
         },
         enabled: !!task_id,
         refetchOnWindowFocus: true,
@@ -57,43 +67,29 @@ const TaskProductSheet = forwardRef((props: TrueSheetProps, ref: React.Ref<TrueS
         console.error("Error fetching task products:", error);
         return ErrorContent(error.message);
     }
-    // const { data, isLoading, error } = useInfiniteQuery({
-    //     queryKey: ["taskProducts", task_id],
-    //     queryFn: async () => {
-    //         const { data, error } = await supabase
-    //         .from("products")
-    //         .select()
-    //     },
-    //     refetchOnWindowFocus: false,
-    //     refetchOnMount: false,
-    //     refetchInterval: false,
-    //     refetchIntervalInBackground: false,
-    // });
 
-    // if (isLoading) {
-
-}
+    // }
     return (
-    <TrueSheet
-        name="TaskProductSheet"
-        sizes={["auto", "100%"]}
-        ref={sheetRef}
-        onMount={() => {
-            console.log("TaskProductSheet mounted!");
-        }}
-        onDismiss={() => {
-            console.log("TaskProductSheet dismissed!");
-        }}
-        {...props}
-    >
-        <Image
-            source={require("@/assets/images/feedback/page-eaten.png")}
-            contentFit="contain"
-            style={{ width: 200, height: 200, marginTop: 20 }}
-            transition={1000}
-        />
-    </TrueSheet>
-);
+        <TrueSheet
+            name="TaskProductSheet"
+            sizes={["auto", "100%"]}
+            ref={sheetRef}
+            onMount={() => {
+                console.log("TaskProductSheet mounted!");
+            }}
+            onDismiss={() => {
+                console.log("TaskProductSheet dismissed!");
+            }}
+            {...props}
+        >
+            <Image
+                source={require("@/assets/images/feedback/page-eaten.png")}
+                contentFit="contain"
+                style={{ width: 200, height: 200, marginTop: 20 }}
+                transition={1000}
+            />
+        </TrueSheet>
+    );
 });
 
 const styles = StyleSheet.create({

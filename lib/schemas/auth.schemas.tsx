@@ -139,3 +139,12 @@ export const simpleCreateUserSchema = passwordLoginSchema
         { message: "Passwords must match", path: ["confirmPassword"] }
     );
 // #endregion Register
+
+
+export const requestResetSchema = z.object({
+    email: z
+        .string()
+        .email("Invalid email address")
+        .min(1, "Email is required")
+        .max(100, "Email must be less than 100 characters")
+});

@@ -48,7 +48,8 @@
       "support": "If you have any questions or concerns about these terms, please contact our support team at support@homeinventoryapp.com."
     },
     "userAgreement": {
-      "statement": "By using this app, you agree to grant the necessary permissions for the app to function as intended. If you do not agree to these terms, please refrain from using the app."
+      "statement": "By using this app, you agree to grant the necessary permissions for the app to function as intended. If you do not agree to these terms, please refrain from using the app.",
+      "note": "Your continued use of the app signifies your acceptance of these terms and conditions. If you do not agree with any part of these terms, please discontinue use of the app immediately or risk permanent suspension of your account."
     }
   }
 }

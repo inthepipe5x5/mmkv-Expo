@@ -2,7 +2,7 @@ import { Database } from "../supabase/dbTypes";
 type task = Database["public"]["Tables"]["tasks"]["Row"];
 type product = Database["public"]["Tables"]["products"]["Row"];
 type profile = Database["public"]["Tables"]["profiles"]["Row"];
-
+//#region fake db data 
 export const fakeProduct = {
     id: "1",
     product_name: "Sample Product",
@@ -121,7 +121,8 @@ export const fakeTask = {
         }
     }
 } as task & { assigned_to: profile };
-
+//#endregion fake db data 
+//#region OpenFoodFacts Fake Data
 /*
 * @source https://github.com/nastiazhyrnova/VeVeScan/blob/master/src/dummy.js
 * Fake OpenFoodFacts product data for testing purposes.
@@ -1209,3 +1210,5 @@ export const OFFProduct = {
     "status": 1,
     "status_verbose": "product found"
 }
+
+//#endregion OpenFoodFacts Fake Data

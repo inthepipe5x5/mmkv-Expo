@@ -18,6 +18,7 @@ import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import DateTimePickerModal from "react-native-modal-datetime-picker"
 import { produce } from "immer";
+import { Card } from "@/components/ui/card";
 
 const customImageBg = (props: Partial<ImageBackgroundProps>) => {
     return <ImageBackground {...props} style={styles.header} resizeMode="cover" />;
@@ -81,32 +82,37 @@ export default function TaskScreen() {
         >
 
             <ThemedView style={styles.titleContainer}>
-                <HStack>
-                    <ThemedText
-                        type="title"
-                        style={{ marginRight: 5 }}
-                    >
-                        {currentTask?.task_name ?? "Task"}</ThemedText>
-                    <Badge
-                        className="ml-5"
-                        action="info"
-                        size="sm"
-                        variant="solid">
-                        <BadgeText>
-                            {currentTask?.draft_status ?? "Draft"}
-                        </BadgeText>
-                    </Badge>
+                <Card
+                    variant="outline"
+                >
 
-                    <Badge
-                        className="ml-5"
-                        action="error"
-                        size="sm"
-                        variant="solid">
-                        <BadgeText>
-                            {currentTask?.completion_status}
-                        </BadgeText>
-                    </Badge>
-                </HStack>
+                    <HStack>
+                        <ThemedText
+                            type="title"
+                            style={{ marginRight: 5 }}
+                        >
+                            {currentTask?.task_name ?? "Task"}</ThemedText>
+                        <Badge
+                            className="ml-5"
+                            action="info"
+                            size="sm"
+                            variant="solid">
+                            <BadgeText>
+                                {currentTask?.draft_status ?? "Draft"}
+                            </BadgeText>
+                        </Badge>
+
+                        <Badge
+                            className="ml-5"
+                            action="error"
+                            size="sm"
+                            variant="solid">
+                            <BadgeText>
+                                {currentTask?.completion_status}
+                            </BadgeText>
+                        </Badge>
+                    </HStack>
+                </Card>
             </ThemedView>
             <ThemedView
                 style={{
@@ -116,7 +122,8 @@ export default function TaskScreen() {
                     backgroundColor: light.accent,
                     alignItems: "center",
                 }}>
-                {!!currentTask?.due_date ? (<ThemedText type="subtitle">Due: {new Date(currentTask.due_date).toLocaleDateString()}</ThemedText>) : (
+                {!!currentTask?.due_date ? (
+                    <ThemedText type="subtitle">Due: {new Date(currentTask.due_date).toLocaleDateString()}</ThemedText>) : (
                     <ThemedText type="subtitle" style={{
                         fontStyle: "italic",
                         color: "red",

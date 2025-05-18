@@ -63,7 +63,6 @@ export default function CuratedImage({ imageTitle,
                 }}
                 // contentFit="cover"
                 placeholder={require("@/assets/images/feedback/page-eaten.png")}
-                onError={() => console.error("Error loading image", { image })}
                 cachePolicy={"memory-disk"}
             />
             {!!imageTitle ? (<Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>props?.imageTitle </Text>) : null}

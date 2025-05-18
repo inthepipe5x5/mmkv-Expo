@@ -1,14 +1,17 @@
 {
   "expo": {
-    "name": "Home Scan",
-    "slug": "home-scan",
+    "name": "homescanapp",
+    "slug": "homescanapp",
+    "entryPoint": "./app/_layout.tsx",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/splash-icon.png",
     "scheme": "myapp.homescan",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "jsEngine": "hermes",
       "supportsTablet": true
@@ -23,7 +26,8 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/splash-icon.png",
+      "backgroundColor": "#3d1e00"
     },
     "plugins": [
       "expo-router",
@@ -33,7 +37,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#3d1e00"
         }
       ],
       [
@@ -60,7 +64,19 @@
             "deploymentTarget": "15.1"
           }
         }
-      ]
+      ],
+      [
+        "expo-localization"
+      ],
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "launcher",
+          "addGeneratedScheme": true
+        }
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

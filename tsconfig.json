@@ -58,5 +58,5 @@
     "components/**/*.tsx",
     "lib/**/*.ts",
     "lib/**/*.tsx"
-  ]
+, "screens/auth/reset-password/EnterNewPasswordstsx"  ]
 }
